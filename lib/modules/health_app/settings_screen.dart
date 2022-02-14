@@ -23,13 +23,8 @@ class Settingsscreen extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: Text(
-                        'Dark Mode',
-                        style: TextStyle(
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      child: Text('Dark Mode',
+                          style: Theme.of(context).textTheme.bodyText1),
                     ),
                     Switch(
                       value: GPCubit.get(context).IsDark,
@@ -47,6 +42,7 @@ class Settingsscreen extends StatelessWidget {
                     function: () {
                       NavidetAndFinish(context, LoginScreen());
                       CachHelper.removeData(key: 'uId');
+                      cubit.currentIndex = 0;
                     },
                     text: 'Log Out'),
               ],

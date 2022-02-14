@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fristapp/model/user_model.dart';
 import 'package:fristapp/modules/register/cubit/states.dart';
+import 'package:fristapp/shared/component/component.dart';
 
 class RegisterCubit extends Cubit<RegisterStates> {
   RegisterCubit() : super(RegisterInitialState());
@@ -25,12 +26,12 @@ class RegisterCubit extends Cubit<RegisterStates> {
       password: password,
     )
         .then((value) {
-      print(value.user!.email);
+      // print(value.user!.email);
       print(value.user!.uid);
       userCreat(name: name, email: email, phone: phone, UId: value.user!.uid);
-      emit(RegisterSuccessState());
+      // showToast(msg: 'Register Successfuly', state: toastStates.SUCCESS);
+      emit(RegisterSuccessState(value.user!.uid));
     }).catchError((Error) {
-      print(Error.toString());
       emit(RegisterErrorState(Error.toString()));
     });
   }
@@ -41,16 +42,16 @@ class RegisterCubit extends Cubit<RegisterStates> {
     required String phone,
     required String UId,
   }) {
-    SocialUserModel model = SocialUserModel(
+    UserModel model = UserModel(
       email: email,
       name: name,
       phone: phone,
       uId: UId,
-      bio: 'write you bio ...',
-      cover:
-          'https://image.freepik.com/free-photo/photo-attractive-bearded-young-man-with-cherful-expression-makes-okay-gesture-with-both-hands-likes-something-dressed-red-casual-t-shirt-poses-against-white-wall-gestures-indoor_273609-16239.jpg',
-      image:
-          'https://image.freepik.com/free-photo/photo-attractive-bearded-young-man-with-cherful-expression-makes-okay-gesture-with-both-hands-likes-something-dressed-red-casual-t-shirt-poses-against-white-wall-gestures-indoor_273609-16239.jpg',
+      // bio: 'write you bio ...',
+      // cover:
+      //     'https://image.freepik.com/free-photo/photo-attractive-bearded-young-man-with-cherful-expression-makes-okay-gesture-with-both-hands-likes-something-dressed-red-casual-t-shirt-poses-against-white-wall-gestures-indoor_273609-16239.jpg',
+      // image:
+      //     'https://image.freepik.com/free-photo/photo-attractive-bearded-young-man-with-cherful-expression-makes-okay-gesture-with-both-hands-likes-something-dressed-red-casual-t-shirt-poses-against-white-wall-gestures-indoor_273609-16239.jpg',
       isEmailVerfied: false,
     );
     FirebaseFirestore.instance
@@ -64,13 +65,13 @@ class RegisterCubit extends Cubit<RegisterStates> {
     });
   }
 
-  IconData suffix = Icons.visibility_outlined;
+  IconData suffix = Icons.visibility_off_outlined;
   bool isPassword = true;
 
   void changePasswordVisibility() {
     isPassword = !isPassword;
     suffix =
-        isPassword ? Icons.visibility_outlined : Icons.visibility_off_outlined;
+        isPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined;
 
     emit(RegisterChangePasswordVisibilityState());
   }

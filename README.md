@@ -1,5 +1,4 @@
 # GP2021
-
 The app right now contains 
 onboarding screen, 
 and both login and register screen authenticate with firebase 

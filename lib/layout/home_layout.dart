@@ -4,6 +4,7 @@ import 'package:fristapp/layout/cubit/cubit.dart';
 import 'package:fristapp/layout/cubit/states.dart';
 import 'package:fristapp/shared/component/constants.dart';
 import 'package:fristapp/shared/component/component.dart';
+import 'package:fristapp/shared/styles/icon_broken.dart';
 
 class HomeLayout extends StatelessWidget {
   @override
@@ -12,6 +13,7 @@ class HomeLayout extends StatelessWidget {
       listener: (context, state) {},
       builder: (context, state) {
         var cubit = GPCubit.get(context);
+        var model = cubit.model;
 
         return Scaffold(
           appBar: AppBar(
@@ -23,6 +25,21 @@ class HomeLayout extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                   ),
             ),
+            actions: [
+              IconButton(
+                onPressed: () {
+                  if (model != null) {
+                    print(model.email);
+                    print(model.name);
+                    print(model.phone);
+                    print(model.uId);
+                  }
+                },
+                icon: Icon(
+                  IconBroken.Show,
+                ),
+              ),
+            ],
           ),
           body: cubit.screens[cubit.currentIndex],
           bottomNavigationBar: BottomNavigationBar(

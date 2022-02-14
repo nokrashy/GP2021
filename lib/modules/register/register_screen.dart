@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fristapp/layout/home_layout.dart';
 import 'package:fristapp/shared/component/component.dart';
+import 'package:fristapp/shared/network/local/cache_helper.dart';
 import 'cubit/cubit.dart';
 import 'cubit/states.dart';
 
@@ -19,8 +20,19 @@ class RegisterScreen extends StatelessWidget {
       create: (BuildContext context) => RegisterCubit(),
       child: BlocConsumer<RegisterCubit, RegisterStates>(
         listener: (context, state) {
-          if (state is CraetUserSuccessState) {
-            NavidetAndFinish(context, HomeLayout());
+          if (state is RegisterErrorState) {
+            showToast(
+              msg: state.error,
+              state: toastStates.ERROR,
+            );
+          }
+          if (state is RegisterSuccessState) {
+            CachHelper.saveData(
+              key: 'uId',
+              value: state.uId,
+            ).then((value) {
+              NavidetAndFinish(context, HomeLayout());
+            });
           }
         },
         builder: (context, state) {

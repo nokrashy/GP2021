@@ -1,4 +1,4 @@
-class SocialUserModel {
+class UserModel {
   late String name;
   late String email;
   late String phone;
@@ -7,7 +7,7 @@ class SocialUserModel {
   late String cover;
   late String bio;
   late bool isEmailVerfied;
-  SocialUserModel({
+  UserModel({
     this.name = '',
     this.email = '',
     this.phone = '',
@@ -17,7 +17,7 @@ class SocialUserModel {
     this.bio = '',
     this.isEmailVerfied = false,
   });
-  SocialUserModel.fromJson(Map<String, dynamic>? json) {
+  UserModel.fromJson(Map<String, dynamic>? json) {
     name = json!['name'];
     email = json['email'];
     phone = json['phone'];
@@ -27,6 +27,8 @@ class SocialUserModel {
     bio = json['bio'];
     isEmailVerfied = json['isEmailVerfied'];
   }
+
+  Object? get length => null;
   Map<String, dynamic> toMap() {
     return {
       'name': name,

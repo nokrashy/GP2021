@@ -55,7 +55,9 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-            create: (context) => GPCubit()..ChangeAppMode(fromShared: isDark)),
+            create: (context) => GPCubit()
+              ..ChangeAppMode(fromShared: isDark)
+              ..getUserData()),
       ],
       child: BlocConsumer<GPCubit, GPStates>(
         listener: (context, state) {},

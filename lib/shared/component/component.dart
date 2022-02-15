@@ -113,7 +113,8 @@ PreferredSizeWidget? defaultAppBar({
 Widget MyDivider() {
   return Padding(
     padding: const EdgeInsetsDirectional.only(
-      start: 20.0,
+      start: 15.0,
+      end: 15.0,
     ),
     child: Container(
       width: double.infinity,

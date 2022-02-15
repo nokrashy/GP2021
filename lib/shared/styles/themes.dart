@@ -4,8 +4,10 @@ import 'package:fristapp/shared/component/constants.dart';
 
 ThemeData darkTheme = ThemeData(
   primarySwatch: defultColor,
+  
   scaffoldBackgroundColor: Colors.grey[800],
   appBarTheme: AppBarTheme(
+    // ignore: deprecated_member_use
     backwardsCompatibility: false,
     systemOverlayStyle: SystemUiOverlayStyle(
       statusBarColor: Colors.grey[800],
@@ -36,6 +38,7 @@ ThemeData darkTheme = ThemeData(
     elevation: 20.0,
   ),
   textTheme: TextTheme(
+
     bodyText1: TextStyle(
       fontWeight: FontWeight.w600,
       fontSize: 20.0,
@@ -54,6 +57,7 @@ ThemeData lightTheme = ThemeData(
   primarySwatch: defultColor,
   scaffoldBackgroundColor: Colors.white,
   appBarTheme: AppBarTheme(
+    // ignore: deprecated_member_use
     backwardsCompatibility: false,
     systemOverlayStyle: SystemUiOverlayStyle(
       statusBarColor: Colors.white,

@@ -13,7 +13,7 @@ class HomeLayout extends StatelessWidget {
       listener: (context, state) {},
       builder: (context, state) {
         var cubit = GPCubit.get(context);
-        var model = cubit.model;
+        var usermodel = cubit.usermodel;
 
         return Scaffold(
           appBar: AppBar(
@@ -28,11 +28,13 @@ class HomeLayout extends StatelessWidget {
             actions: [
               IconButton(
                 onPressed: () {
-                  if (model != null) {
-                    print(model.email);
-                    print(model.name);
-                    print(model.phone);
-                    print(model.uId);
+                  if (usermodel != null) {
+                    print('hello');
+                    print(usermodel.email);
+                    print(usermodel.name);
+                    print(usermodel.phone);
+                    print(usermodel.uId);
+                    print(usermodel.cover);
                   }
                 },
                 icon: Icon(

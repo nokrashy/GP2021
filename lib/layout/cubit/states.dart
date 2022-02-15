@@ -16,3 +16,16 @@ class GetUserErrorState extends GPStates {
   final String error;
   GetUserErrorState(this.error);
 }
+
+
+//
+class UserDeleteAccountLoadingState extends GPStates {}
+
+class UserDeleteAccountSuccessState extends GPStates {}
+
+class UserDeleteAccountErrorState extends GPStates {
+  late final String Error;
+  UserDeleteAccountErrorState(this.Error);
+}
+
+//

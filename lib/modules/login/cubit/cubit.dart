@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fristapp/model/user_model.dart';
 import 'package:fristapp/modules/login/cubit/states.dart';
 import 'package:fristapp/shared/network/end_points.dart';
 import 'package:fristapp/shared/network/remote/dio_helper.dart';
@@ -26,6 +27,8 @@ class LoginCubit extends Cubit<LoginStates> {
       emit(LoginErrorState(Error.toString()));
     });
   }
+
+  
 
   bool IsPassward = true;
   IconData suffix = Icons.visibility_off_outlined;

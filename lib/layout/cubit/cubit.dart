@@ -17,6 +17,7 @@ import 'package:fristapp/shared/styles/icon_broken.dart';
 import 'package:health/health.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
+import 'dart:math';
 
 class GPCubit extends Cubit<GPStates> {
   GPCubit() : super(InitialState());
@@ -107,6 +108,25 @@ class GPCubit extends Cubit<GPStates> {
   HealthDataPoint? lastDateBloodPressureDiastolic;
 
   double _mgdl = 10.0;
+  double _hr = 80;
+  double _steps = 50;
+  double _calories = 17;
+
+// Alarm
+
+  // Future<void> Alarm() async {
+  //   print('*********************************');
+  //   final int helloAlarmID = 0;
+  //   await AndroidAlarmManager.periodic(
+  //       const Duration(minutes: 1), helloAlarmID, printHello);
+  // }
+
+  // void printHello() {
+  //   print('HElllllllllloooooooooooooooo');
+  //   final DateTime now = DateTime.now();
+  //   final int isolateId = Isolate.current.hashCode;
+  //   print("[$now] Hello, world! isolate=${isolateId} function='$printHello'");
+  // }
 
   /// Add some random health data.
   Future addData() async {
@@ -115,11 +135,23 @@ class GPCubit extends Cubit<GPStates> {
 
     // nofsteps = Random().nextInt(10);
     nofsteps = 100;
-    final types = [HealthDataType.STEPS, HealthDataType.BLOOD_GLUCOSE];
-    final rights = [HealthDataAccess.WRITE, HealthDataAccess.WRITE];
+    final types = [
+      HealthDataType.STEPS,
+      HealthDataType.BLOOD_GLUCOSE,
+      HealthDataType.HEART_RATE,
+      HealthDataType.ACTIVE_ENERGY_BURNED
+    ];
+    final rights = [
+      HealthDataAccess.WRITE,
+      HealthDataAccess.WRITE,
+      HealthDataAccess.WRITE,
+      HealthDataAccess.WRITE
+    ];
     final permissions = [
       HealthDataAccess.READ_WRITE,
-      HealthDataAccess.READ_WRITE
+      HealthDataAccess.READ_WRITE,
+      HealthDataAccess.READ_WRITE,
+      HealthDataAccess.READ_WRITE,
     ];
     bool? hasPermissions =
         await HealthFactory.hasPermissions(types, permissions: rights);
@@ -128,13 +160,26 @@ class GPCubit extends Cubit<GPStates> {
     }
 
     // _mgdl = Random().nextInt(10) * 1.0;
-    _mgdl = 100;
-    bool success = await health.writeHealthData(
-        nofsteps!.toDouble(), HealthDataType.STEPS, earlier, now);
+    _mgdl = Random().nextInt(80) + 50;
+    _hr = Random().nextInt(50) + 60;
+    _steps = Random().nextInt(250) + 0;
+    _calories = Random().nextInt(10) + 17;
+    // bool success = await health.writeHealthData(
+    //     nofsteps!.toDouble(), HealthDataType.STEPS, earlier, now);
+
+    bool success = true;
+
+    // bool success = await health.writeHealthData(
+    //     nofsteps!.toDouble(), HealthDataType.STEPS, earlier, now);
 
     if (success) {
       success = await health.writeHealthData(
           _mgdl, HealthDataType.BLOOD_GLUCOSE, now, now);
+      await health.writeHealthData(
+          _steps.toDouble(), HealthDataType.STEPS, earlier, now);
+      await health.writeHealthData(_hr, HealthDataType.HEART_RATE, now, now);
+      await health.writeHealthData(_calories.toDouble(),
+          HealthDataType.ACTIVE_ENERGY_BURNED, earlier, now);
     }
     if (success) {
       emit(DataAddedToGoogleFitSuccessState());
@@ -184,6 +229,7 @@ class GPCubit extends Cubit<GPStates> {
     ];
     bool _requested =
         await health.requestAuthorization(types, permissions: permissions);
+    print(_requested);
 
     if (_requested) {
       setrequested(true);

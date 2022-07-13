@@ -27,6 +27,7 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  # android_alarm_manager_plus: ^2.0.6
   audioplayers: ^0.20.1
   bloc: ^7.0.0
   carousel_slider: ^4.0.0
@@ -61,7 +62,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  http:
+  http: null
 # flutter_lints: ^1.0.0
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

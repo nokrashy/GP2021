@@ -21,6 +21,14 @@ import 'modules/on_boarding/on_boarding_screen.dart';
 import 'modules/vitals/heart_rate/cubit/cubit.dart';
 import 'modules/vitals/steps/cubit/cubit.dart';
 
+// void printHello() {
+//   print('HElllllllllloooooooooooooooo');
+//   final DateTime now = DateTime.now();
+//   final int isolateId = Isolate.current.hashCode;
+//   print("[$now] Hello, world! isolate=${isolateId} function='$printHello'");
+// }
+
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -49,6 +57,12 @@ void main() async {
   }));
 
   runApp(MyApp(isDark, widget));
+
+  // ALarm
+  // final int helloAlarmID = 0;
+  // await AndroidAlarmManager.periodic(
+  //     const Duration(minutes: 1), helloAlarmID, printHello);
+  
 }
 
 class MyApp extends StatelessWidget {

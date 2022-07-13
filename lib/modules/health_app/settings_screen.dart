@@ -213,6 +213,34 @@ class Settingsscreen extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
+                        child: Text(
+                          'Activate',
+                          style:
+                              Theme.of(context).textTheme.bodyText1!.copyWith(
+                                    fontSize: 22.0,
+                                    fontWeight: FontWeight.normal,
+                                  ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Transform.scale(
+                          scale: 1.5,
+                          child: Switch(
+                            value: cubit.isOn,
+                            onChanged: (value) async {
+                              cubit.ChangeisOn(fromShared: value);
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 20.0,
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
                         child: Container(
                           height: 40,
                           child: OutlinedButton(

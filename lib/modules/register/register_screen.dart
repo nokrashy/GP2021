@@ -5,6 +5,8 @@ import 'package:fristapp/layout/home_layout.dart';
 import 'package:fristapp/modules/login/login_screen.dart';
 import 'package:fristapp/shared/component/component.dart';
 import 'package:fristapp/shared/network/local/cache_helper.dart';
+import '../../shared/styles/MyIcon.dart.dart';
+import '../../shared/styles/icon_broken.dart';
 import 'cubit/cubit.dart';
 import 'cubit/states.dart';
 
@@ -14,6 +16,8 @@ class RegisterScreen extends StatelessWidget {
   var emailController = TextEditingController();
   var passwordController = TextEditingController();
   var phoneController = TextEditingController();
+  var weightController = TextEditingController();
+  var heightController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -119,11 +123,39 @@ class RegisterScreen extends StatelessWidget {
                           type: TextInputType.phone,
                           validate: (value) {
                             if (value!.isEmpty) {
-                              return 'please enter your phone number';
+                              return 'please enter your doctor phone number';
                             }
                           },
-                          lable: 'Phone',
+                          lable: 'Doctor Phone',
                           prefix: Icons.phone,
+                        ),
+                        SizedBox(
+                          height: 30.0,
+                        ),
+                        defultFormField(
+                          controller: weightController,
+                          type: TextInputType.number,
+                          validate: (value) {
+                            if (value!.isEmpty) {
+                              return 'please enter your weight';
+                            }
+                          },
+                          lable: 'Weight',
+                          prefix: MyIcon.weight,
+                        ),
+                        SizedBox(
+                          height: 30.0,
+                        ),
+                        defultFormField(
+                          controller: heightController,
+                          type: TextInputType.number,
+                          validate: (value) {
+                            if (value!.isEmpty) {
+                              return 'please enter your Height';
+                            }
+                          },
+                          lable: 'Height',
+                          prefix: IconBroken.Filter,
                         ),
                         SizedBox(
                           height: 30.0,
@@ -131,17 +163,17 @@ class RegisterScreen extends StatelessWidget {
                         ConditionalBuilder(
                           condition: state is! RegisterLoadingState,
                           builder: (context) => defulteButton(
-                            function: () async{
+                            function: () async {
                               if (formKey.currentState!.validate()) {
                                 RegisterCubit.get(context).userRegister(
                                   name: nameController.text,
                                   email: emailController.text,
                                   password: passwordController.text,
                                   phone: phoneController.text,
+                                  height: heightController.text,
+                                  weight: weightController.text,
                                 );
-                                 
                               }
-
                             },
                             text: 'register',
                             isUpperCase: true,

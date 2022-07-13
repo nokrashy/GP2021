@@ -18,6 +18,8 @@ class RegisterCubit extends Cubit<RegisterStates> {
     required String email,
     required String password,
     required String phone,
+    required String weight,
+    required String height,
   }) {
     emit(RegisterLoadingState());
     FirebaseAuth.instance
@@ -28,7 +30,13 @@ class RegisterCubit extends Cubit<RegisterStates> {
         .then((value) {
       // print(value.user!.email);
       print(value.user!.uid);
-      userCreat(name: name, email: email, phone: phone, UId: value.user!.uid);
+      userCreat(
+          name: name,
+          email: email,
+          phone: phone,
+          UId: value.user!.uid,
+          height: height,
+          weight: weight);
       // showToast(msg: 'Register Successfuly', state: toastStates.SUCCESS);
       emit(RegisterSuccessState(value.user!.uid));
     }).catchError((Error) {
@@ -40,6 +48,8 @@ class RegisterCubit extends Cubit<RegisterStates> {
     required String name,
     required String email,
     required String phone,
+    required String height,
+    required String weight,
     required String UId,
   }) {
     UserModel model = UserModel(
@@ -47,6 +57,9 @@ class RegisterCubit extends Cubit<RegisterStates> {
       name: name,
       phone: phone,
       uId: UId,
+      height: height,
+      weight: weight,
+
       // bio: 'write you bio ...',
       cover:
           'https://user-images.githubusercontent.com/79063735/154086657-c8aa4a69-5301-42bd-8221-15a57aa9c72e.jpg',

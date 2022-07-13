@@ -2,6 +2,8 @@ class UserModel {
   late String name;
   late String email;
   late String phone;
+  late String height;
+  late String weight;
   late String uId;
   late String image;
   late String cover;
@@ -11,6 +13,8 @@ class UserModel {
     this.name = '',
     this.email = '',
     this.phone = '',
+    this.height = '',
+    this.weight = '',
     this.uId = '',
     this.image = '',
     this.cover = '',
@@ -21,6 +25,8 @@ class UserModel {
     name = json!['name'];
     email = json['email'];
     phone = json['phone'];
+    height = json['height'];
+    weight = json['weight'];
     uId = json['uId'];
     image = json['image'];
     cover = json['cover'];
@@ -34,6 +40,8 @@ class UserModel {
       'name': name,
       'email': email,
       'phone': phone,
+      'height': height,
+      'weight': weight,
       'uId': uId,
       'image': image,
       'cover': cover,

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -91,9 +93,7 @@ class GPCubit extends Cubit<GPStates> {
 
 // create a HealthFactory for use in the app
   HealthFactory health = HealthFactory();
-
   List<HealthDataPoint> healthDataList = [];
-// AppState _state = AppState.DATA_NOT_FETCHED;
   int? nofsteps;
 
   HealthDataPoint? lastDateSteps;
@@ -113,14 +113,12 @@ class GPCubit extends Cubit<GPStates> {
   double _calories = 17;
 
 // Alarm
-
   // Future<void> Alarm() async {
   //   print('*********************************');
   //   final int helloAlarmID = 0;
   //   await AndroidAlarmManager.periodic(
   //       const Duration(minutes: 1), helloAlarmID, printHello);
   // }
-
   // void printHello() {
   //   print('HElllllllllloooooooooooooooo');
   //   final DateTime now = DateTime.now();
@@ -826,5 +824,43 @@ class GPCubit extends Cubit<GPStates> {
       print('Error: ${e}');
       emit(MOdelErrorState());
     }
+  }
+
+  bool isOn = false;
+  int alarmId = 1;
+  void ChangeisOn({bool? fromShared}) {
+    if (fromShared != null) {
+      isOn = fromShared;
+    } else
+      isOn = !isOn;
+    CachHelper.saveData(key: 'isOn', value: isOn).then((value) {
+      emit(ChangeisOnState());
+    });
+    if (isOn == true) {
+      modelCycleOn();
+    } else {
+      modelCycleOff();
+    }
+  }
+
+  Timer? timer;
+  void modelCycleOn() {
+    const oneSec = Duration(minutes: 5);
+    timer = Timer.periodic(oneSec, (Timer t) {
+      print("**********************");
+      print(DateTime.now());
+      showToast(msg: "Data Added", state: toastStates.SUCCESS);
+      addData();
+      emit(ModelCycleState());
+    });
+  }
+
+  void modelCycleOff() {
+    if (timer != null) {
+      timer?.cancel();
+      print('Timer Turned OFF');
+    }
+
+    emit(ModelCycleOFFState());
   }
 }

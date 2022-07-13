@@ -28,7 +28,6 @@ import 'modules/vitals/steps/cubit/cubit.dart';
 //   print("[$now] Hello, world! isolate=${isolateId} function='$printHello'");
 // }
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -38,7 +37,7 @@ void main() async {
   Widget widget;
   uId = await CachHelper.getData(key: 'uId');
   bool isDark = await CachHelper.getData(key: 'isDark');
-
+  bool isOn = await CachHelper.getData(key: 'isOn');
 //
   // await Permission.activityRecognition.request();
 
@@ -56,19 +55,19 @@ void main() async {
     print(value);
   }));
 
-  runApp(MyApp(isDark, widget));
+  runApp(MyApp(isDark, widget, isOn));
 
   // ALarm
   // final int helloAlarmID = 0;
   // await AndroidAlarmManager.periodic(
   //     const Duration(minutes: 1), helloAlarmID, printHello);
-  
 }
 
 class MyApp extends StatelessWidget {
   final Widget statrWidget;
   final bool isDark;
-  MyApp(this.isDark, this.statrWidget);
+  final bool isOn;
+  MyApp(this.isDark, this.statrWidget, this.isOn);
 
   @override
   Widget build(BuildContext context) {
@@ -77,6 +76,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(
             create: (context) => GPCubit()
               ..ChangeAppMode(fromShared: isDark)
+              ..ChangeisOn(fromShared: isOn)
               ..getUserData()
             // ..fetchData()
             // ..fetchStepData()

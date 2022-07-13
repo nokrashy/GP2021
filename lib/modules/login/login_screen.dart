@@ -2,6 +2,7 @@ import 'package:conditional_builder/conditional_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:fristapp/layout/cubit/cubit.dart';
 import 'package:fristapp/layout/home_layout.dart';
 import 'package:fristapp/modules/login/cubit/cubit.dart';
 import 'package:fristapp/modules/login/cubit/states.dart';
@@ -10,6 +11,8 @@ import 'package:fristapp/shared/component/component.dart';
 import 'package:fristapp/shared/network/local/cache_helper.dart';
 import 'package:fristapp/shared/network/remote/dio_helper.dart';
 import 'package:permission_handler/permission_handler.dart';
+
+import '../../shared/component/constants.dart';
 
 class LoginScreen extends StatelessWidget {
   var emailController = TextEditingController();
@@ -28,6 +31,9 @@ class LoginScreen extends StatelessWidget {
           );
         }
         if (State is LoginSuccessState) {
+          uId = State.uId;
+          GPCubit.get(context).getUserData();
+
           CachHelper.saveData(
             key: 'uId',
             value: State.uId,

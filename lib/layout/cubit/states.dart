@@ -117,3 +117,9 @@ class MOdelrSuccessState extends GPStates {}
 class MOdelErrorState extends GPStates {}
 
 class MOdelLoadingState extends GPStates {}
+
+class ChangeisOnState extends GPStates {}
+
+class ModelCycleState extends GPStates {}
+
+class ModelCycleOFFState extends GPStates {}

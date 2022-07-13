@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fristapp/layout/cubit/cubit.dart';
 import 'package:fristapp/layout/cubit/states.dart';
-import 'package:fristapp/modules/vitals/energy_burned.dart';
+import 'package:fristapp/modules/vitals/Calories/energy_burned.dart';
 import 'package:fristapp/modules/vitals/heart_rate/heart_rate.dart';
 import 'package:fristapp/modules/vitals/steps/total_steps.dart';
 import 'package:fristapp/shared/component/component.dart';
 import 'package:fristapp/shared/styles/MyIcon.dart.dart';
 import 'package:fristapp/shared/styles/icon_broken.dart';
+
+import '../vitals/height.dart';
+import '../vitals/weight.dart';
 
 class Infoscreen extends StatelessWidget {
   bool showData = false;
@@ -45,6 +48,20 @@ class Infoscreen extends StatelessWidget {
                         children: [
                           GestureDetector(
                             onTap: () {
+                              print('*************************');
+                              print('Blood Pressure');
+                              // NavigetTo(context, BloodOxygen());
+                            },
+                            child: InfoCard(
+                              title: 'Blood Glucose',
+                              content: 'mmol/L',
+                              icon: IconBroken.User,
+                              isPrimaryColor: false,
+                              context: context,
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () {
                               NavigetTo(context, HeartRate());
                             },
                             child: InfoCard(
@@ -79,53 +96,18 @@ class Infoscreen extends StatelessWidget {
                               context: context,
                             ),
                           ),
-                          GestureDetector(
-                            onTap: () {
-                              print('*************************');
-                              print('Blood Pressure');
-                              print(cubit.lastDateBloodPressureSystolic!.value);
-                              print(
-                                  cubit.lastDateBloodPressureDiastolic!.value);
-                              print('*************************');
-                              // NavigetTo(context, BloodOxygen());
-                            },
-                            child: InfoCard(
-                              title: 'Blood Pressure',
-                              content: 'mmHg',
-                              icon: IconBroken.User,
-                              isPrimaryColor: false,
-                              context: context,
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              print('*************************');
-                              print('Body Temperatur');
-                              print(cubit.lastDateBodyTemperatur!.value);
-                              print('*************************');
-                              // NavigetTo(context, BloodOxygen());
 
-                              // NavigetTo(context, BloodOxygen());
-                            },
-                            child: InfoCard(
-                              title: 'Body Temperature',
-                              content: '°C',
-                              icon: MyIcon.temperatire,
-                              isPrimaryColor: false,
-                              context: context,
-                            ),
-                          ),
                           GestureDetector(
                             onTap: () {
                               // print('*************************');
-                              // print('Height');
+                              print('Height');
                               // print(cubit.lastDateHeight!.value);
                               // print('*************************');
-                              // NavigetTo(context, BloodOxygen());
+                              NavigetTo(context, Height());
                             },
                             child: InfoCard(
                               title: 'Height',
-                              content: 'Meters',
+                              content: 'Centimeters ',
                               icon: IconBroken.Filter,
                               isPrimaryColor: false,
                               context: context,
@@ -133,7 +115,7 @@ class Infoscreen extends StatelessWidget {
                           ),
                           GestureDetector(
                             onTap: () {
-                              // NavigetTo(context, BloodOxygen());
+                              NavigetTo(context, Weight());
                             },
                             child: InfoCard(
                               title: 'Weight',
@@ -143,18 +125,34 @@ class Infoscreen extends StatelessWidget {
                               context: context,
                             ),
                           ),
-                          GestureDetector(
-                            onTap: () {
-                              // NavigetTo(context, BloodOxygen());
-                            },
-                            child: InfoCard(
-                              title: 'SpO2',
-                              content: 'Percentage',
-                              icon: MyIcon.pan_tool,
-                              isPrimaryColor: false,
-                              context: context,
-                            ),
-                          ),
+                          // GestureDetector(
+                          //   onTap: () {
+                          //     // NavigetTo(context, BloodOxygen());
+                          //   },
+                          //   child: InfoCard(
+                          //     title: 'SpO2',
+                          //     content: 'Percentage',
+                          //     icon: MyIcon.pan_tool,
+                          //     isPrimaryColor: false,
+                          //     context: context,
+                          //   ),
+                          // ),
+                          // GestureDetector(
+                          //   onTap: () {
+                          //     print('*************************');
+                          //     print('Body Temperatur');
+                          //     print(cubit.lastDateBodyTemperatur!.value);
+                          //     print('*************************');
+
+                          //   },
+                          //   child: InfoCard(
+                          //     title: 'Body Temperature',
+                          //     content: '°C',
+                          //     icon: MyIcon.temperatire,
+                          //     isPrimaryColor: false,
+                          //     context: context,
+                          //   ),
+                          // ),
                         ],
                       ),
                     ]),

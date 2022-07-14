@@ -13,11 +13,11 @@ class EnergyBurned extends StatelessWidget {
       listener: (context, state) {},
       builder: (context, state) {
         var cubit = GPCubit.get(context);
-        var today = cubit.lastDateEnergyBurned!.dateFrom;
-        String dateSlug =
-            "${today.day.toString().padLeft(2, '0')}-${today.month.toString().padLeft(2, '0')}-${today.year.toString()}";
-        String timeSlug =
-            "${today.hour.toString()}:${today.minute.toString().padLeft(2, '0')}";
+        // var today = cubit.lastDateEnergyBurned!.dateFrom;
+        // String dateSlug =
+        //     "${today.day.toString().padLeft(2, '0')}-${today.month.toString().padLeft(2, '0')}-${today.year.toString()}";
+        // String timeSlug =
+        //     "${today.hour.toString()}:${today.minute.toString().padLeft(2, '0')}";
 
         return Scaffold(
           appBar: AppBar(
@@ -34,11 +34,12 @@ class EnergyBurned extends StatelessWidget {
               ),
             ),
           ),
-          body: tempitembuilder(
-            value: cubit.lastDateEnergyBurned!.value.round(),
-            date: dateSlug,
-            time: timeSlug,
-          ),
+          body: Text('data') , 
+          // tempitembuilder(
+          //   value: cubit.lastDateEnergyBurned!.value.round(),
+          //   date: dateSlug,
+          //   time: timeSlug,
+          // ),
         );
       },
     );

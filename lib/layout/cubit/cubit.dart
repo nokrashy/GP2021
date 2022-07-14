@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -21,12 +20,15 @@ import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'dart:math';
 
+import 'Constant/google_fit_functions.dart';
+
 class GPCubit extends Cubit<GPStates> {
   GPCubit() : super(InitialState());
   static GPCubit get(context) => BlocProvider.of(context);
+
+  // ******************************      Main App Construction      ******************************
   int currentIndex = 0;
   List<String> appBartitle = ['Diabetes Mellitus', 'Vitals', 'Settings'];
-
   List<BottomNavigationBarItem> bottomItems = [
     BottomNavigationBarItem(
         icon: Icon(
@@ -44,7 +46,6 @@ class GPCubit extends Cubit<GPStates> {
       label: 'Settings',
     ),
   ];
-
   void changeBottomNavBar(int index) {
     currentIndex = index;
     emit(BottomNavState());
@@ -55,7 +56,6 @@ class GPCubit extends Cubit<GPStates> {
     Infoscreen(),
     Settingsscreen(),
   ];
-
   bool IsDark = false;
   void ChangeAppMode({bool? fromShared}) {
     if (fromShared != null) {
@@ -67,6 +67,7 @@ class GPCubit extends Cubit<GPStates> {
     });
   }
 
+// ******************************      Firebase      ******************************
   UserModel? usermodel;
   void getUserData() {
     emit(GetUserLoadingState());
@@ -91,61 +92,40 @@ class GPCubit extends Cubit<GPStates> {
     });
   }
 
-// create a HealthFactory for use in the app
+// ******************************      Google Fit      ******************************
   HealthFactory health = HealthFactory();
   List<HealthDataPoint> healthDataList = [];
-  int? nofsteps;
 
-  HealthDataPoint? lastDateSteps;
-  HealthDataPoint? lastDateWeight;
-  HealthDataPoint? lastDateHeight;
-  HealthDataPoint? lastDateBloodGlucose;
-  HealthDataPoint? lastDateHeartRate;
-  HealthDataPoint? lastDateEnergyBurned;
-  HealthDataPoint? lastDateBloodOxygen;
-  HealthDataPoint? lastDateBodyTemperatur;
-  HealthDataPoint? lastDateBloodPressureSystolic;
-  HealthDataPoint? lastDateBloodPressureDiastolic;
+// Request Connect to google fit
+  bool AuthorizationRequested = false;
 
-  double _mgdl = 10.0;
-  double _hr = 80;
-  double _steps = 50;
-  double _calories = 17;
-
-// Alarm
-  // Future<void> Alarm() async {
-  //   print('*********************************');
-  //   final int helloAlarmID = 0;
-  //   await AndroidAlarmManager.periodic(
-  //       const Duration(minutes: 1), helloAlarmID, printHello);
-  // }
-  // void printHello() {
-  //   print('HElllllllllloooooooooooooooo');
-  //   final DateTime now = DateTime.now();
-  //   final int isolateId = Isolate.current.hashCode;
-  //   print("[$now] Hello, world! isolate=${isolateId} function='$printHello'");
-  // }
-
-  /// Add some random health data.
-  Future addData() async {
-    final now = DateTime.now();
-    final earlier = now.subtract(Duration(minutes: 5));
-
-    // nofsteps = Random().nextInt(10);
-    nofsteps = 100;
+  Future Request_Connect() async {
+    emit(StartConnecttoFitState());
     final types = [
       HealthDataType.STEPS,
-      HealthDataType.BLOOD_GLUCOSE,
       HealthDataType.HEART_RATE,
-      HealthDataType.ACTIVE_ENERGY_BURNED
+      HealthDataType.ACTIVE_ENERGY_BURNED,
+      HealthDataType.WEIGHT,
+      HealthDataType.HEIGHT,
+      HealthDataType.BLOOD_GLUCOSE,
+      HealthDataType.BODY_FAT_PERCENTAGE,
+      HealthDataType.BODY_TEMPERATURE,
     ];
     final rights = [
-      HealthDataAccess.WRITE,
-      HealthDataAccess.WRITE,
-      HealthDataAccess.WRITE,
-      HealthDataAccess.WRITE
+      HealthDataAccess.READ,
+      HealthDataAccess.READ,
+      HealthDataAccess.READ,
+      HealthDataAccess.READ,
+      HealthDataAccess.READ,
+      HealthDataAccess.READ,
+      HealthDataAccess.READ,
+      HealthDataAccess.READ,
     ];
     final permissions = [
+      HealthDataAccess.READ_WRITE,
+      HealthDataAccess.READ_WRITE,
+      HealthDataAccess.READ_WRITE,
+      HealthDataAccess.READ_WRITE,
       HealthDataAccess.READ_WRITE,
       HealthDataAccess.READ_WRITE,
       HealthDataAccess.READ_WRITE,
@@ -154,504 +134,75 @@ class GPCubit extends Cubit<GPStates> {
     bool? hasPermissions =
         await HealthFactory.hasPermissions(types, permissions: rights);
     if (hasPermissions == false) {
-      await health.requestAuthorization(types, permissions: permissions);
+      AuthorizationRequested =
+          await health.requestAuthorization(types, permissions: rights);
+      AuthorizationRequested =
+          await health.requestAuthorization(types, permissions: permissions);
     }
+    if (AuthorizationRequested) {
+      emit(ConnecttoFitSuccessState());
+    } else {
+      emit(ConnecttoFitFailedsState());
+    }
+  }
 
-    // _mgdl = Random().nextInt(10) * 1.0;
+  // Add some random health data.
+  double? _mgdl;
+  double? _hr;
+  double? _steps;
+  double? _calories;
+  double? _weight;
+  double? _height;
+  double? _fat_insuline;
+  double? _temperatur_carbohydrates;
+
+  Future addData() async {
+    final now = DateTime.now();
+    final earlier = now.subtract(Duration(minutes: 5));
     _mgdl = Random().nextInt(80) + 50;
     _hr = Random().nextInt(50) + 60;
     _steps = Random().nextInt(250) + 0;
     _calories = Random().nextInt(10) + 17;
-    // bool success = await health.writeHealthData(
-    //     nofsteps!.toDouble(), HealthDataType.STEPS, earlier, now);
+    _weight = Random().nextInt(50) + 50;
+    _height = Random().nextInt(100) + 100;
+    _fat_insuline = Random().nextInt(99) + 1;
+    _temperatur_carbohydrates = Random().nextInt(100) + 20;
 
-    bool success = true;
+    bool _success1 = await health.writeHealthData(
+        _mgdl!, HealthDataType.BLOOD_GLUCOSE, now, now);
+    bool _success2 = await health.writeHealthData(
+        _steps!.toDouble(), HealthDataType.STEPS, earlier, now);
+    bool _success3 =
+        await health.writeHealthData(_hr!, HealthDataType.HEART_RATE, now, now);
+    bool _success4 = await health.writeHealthData(_calories!.toDouble(),
+        HealthDataType.ACTIVE_ENERGY_BURNED, earlier, now);
+    bool _success5 =
+        await health.writeHealthData(_weight!, HealthDataType.WEIGHT, now, now);
+    bool _success6 = await health.writeHealthData(
+        (_height! * 0.01), HealthDataType.HEIGHT, now, now);
+    bool _success7 =   await health
+          .writeHealthData(1, HealthDataType.BODY_FAT_PERCENTAGE, now, now);
+    bool _success8 = await health.writeHealthData(
+        _temperatur_carbohydrates!, HealthDataType.BODY_TEMPERATURE, now, now);
 
-    // bool success = await health.writeHealthData(
-    //     nofsteps!.toDouble(), HealthDataType.STEPS, earlier, now);
-
-    if (success) {
-      success = await health.writeHealthData(
-          _mgdl, HealthDataType.BLOOD_GLUCOSE, now, now);
-      await health.writeHealthData(
-          _steps.toDouble(), HealthDataType.STEPS, earlier, now);
-      await health.writeHealthData(_hr, HealthDataType.HEART_RATE, now, now);
-      await health.writeHealthData(_calories.toDouble(),
-          HealthDataType.ACTIVE_ENERGY_BURNED, earlier, now);
-    }
-    if (success) {
+   
+    if (_success1 &
+        _success2 &
+        _success3 &
+        _success4 &
+        _success5 &
+        _success6 &
+        _success7 &
+        _success8) {
       emit(DataAddedToGoogleFitSuccessState());
     } else {
       emit(DataAddedToGoogleFitErrorState());
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // Request Connect to google fit
-  bool requested = false;
-
-  bool getrequested() {
-    return requested;
-  }
-
-  void setrequested(bool req) {
-    requested = req;
-  }
-
-  Future Request_Connect() async {
-    emit(StartConnecttoFitState());
-    // define the types to get
-    final types = [
-      HealthDataType.STEPS,
-      HealthDataType.HEART_RATE,
-      HealthDataType.ACTIVE_ENERGY_BURNED,
-      HealthDataType.BLOOD_PRESSURE_SYSTOLIC,
-      HealthDataType.BLOOD_PRESSURE_DIASTOLIC,
-      HealthDataType.WEIGHT,
-      HealthDataType.HEIGHT,
-      HealthDataType.BLOOD_GLUCOSE,
-      HealthDataType.BLOOD_OXYGEN,
-      HealthDataType.BODY_TEMPERATURE,
-    ];
-    final permissions = [
-      HealthDataAccess.READ,
-      HealthDataAccess.READ,
-      HealthDataAccess.READ,
-      HealthDataAccess.READ,
-      HealthDataAccess.READ,
-      HealthDataAccess.READ,
-      HealthDataAccess.READ,
-      HealthDataAccess.READ,
-      HealthDataAccess.READ,
-      HealthDataAccess.READ,
-    ];
-    bool _requested =
-        await health.requestAuthorization(types, permissions: permissions);
-    print(_requested);
-
-    if (_requested) {
-      setrequested(true);
-      emit(ConnecttoFitSuccessState());
-    } else {
-      setrequested(false);
-      emit(ConnecttoFitFailedsState());
-    }
-  }
-
-// Fetch Steps
-  Future fetchSteps({required final from, required final to}) async {
-    emit(StepsStartFetchedState());
-    List<HealthDataPoint> stepsHealthDataList = [];
-    bool requested = await health.requestAuthorization([HealthDataType.STEPS],
-        permissions: [HealthDataAccess.READ]);
-    if (requested) {
-      try {
-        List<HealthDataPoint> healthData = await health
-            .getHealthDataFromTypes(from, to, [HealthDataType.STEPS]);
-        stepsHealthDataList.addAll(healthData);
-      } catch (error) {
-        print("Exception in getHealthDataFromTypes: $error");
-      }
-      stepsHealthDataList = HealthFactory.removeDuplicates(stepsHealthDataList);
-      if (stepsHealthDataList.isEmpty) {
-        emit(StepsNotFetchedState());
-      } else {
-        emit(StepsFetchedSucessfullyState());
-      }
-    } else {
-      print("Authorization not granted");
-      emit(StepsAuthorizationNotGrantedState());
-    }
-    return stepsHealthDataList;
-  }
-
-  // Fetch Heart Rate
-  Future fetchHeartRate({required final from, required final to}) async {
-    emit(HrStartFetchedState());
-    List<HealthDataPoint> heartRateDataList = [];
-    bool requested = await health.requestAuthorization(
-        [HealthDataType.HEART_RATE],
-        permissions: [HealthDataAccess.READ]);
-    if (requested) {
-      try {
-        List<HealthDataPoint> healthData = await health
-            .getHealthDataFromTypes(from, to, [HealthDataType.HEART_RATE]);
-        heartRateDataList.addAll(healthData);
-      } catch (error) {
-        print("Exception in getHealthDataFromTypes: $error");
-      }
-      heartRateDataList = HealthFactory.removeDuplicates(heartRateDataList);
-
-      if (heartRateDataList.isEmpty) {
-        emit(HrNotFetchedState());
-      } else {
-        emit(HrFetchedSucessfullyState());
-      }
-    } else {
-      emit(HrAuthorizationNotGrantedState());
-    }
-
-    return heartRateDataList;
-  }
-
-  // fetch calories
-  Future fetchCalories({required final from, required final to}) async {
-    emit(caloriesStartFetchedState());
-    List<HealthDataPoint> caloriesDataList = [];
-    bool requested = await health.requestAuthorization(
-        [HealthDataType.ACTIVE_ENERGY_BURNED],
-        permissions: [HealthDataAccess.READ]);
-    if (requested) {
-      try {
-        List<HealthDataPoint> healthData = await health.getHealthDataFromTypes(
-            from, to, [HealthDataType.ACTIVE_ENERGY_BURNED]);
-        caloriesDataList.addAll(healthData);
-        print(caloriesDataList);
-      } catch (error) {
-        print("Exception in getHealthDataFromTypes: $error");
-      }
-      caloriesDataList = HealthFactory.removeDuplicates(caloriesDataList);
-
-      if (caloriesDataList.isEmpty) {
-        emit(caloriesNotFetchedState());
-      } else {
-        emit(caloriesFetchedSucessfullyState());
-      }
-    } else {
-      emit(caloriesAuthorizationNotGrantedState());
-    }
-    return caloriesDataList;
-  }
-
-  // fetch SystolicPressure
-  Future fetchSystolicPressure({required final from, required final to}) async {
-    emit(SystolicpressureStartFetchedState());
-    List<HealthDataPoint> systolicpressureDataList = [];
-    bool requested = await health.requestAuthorization(
-        [HealthDataType.BLOOD_PRESSURE_SYSTOLIC],
-        permissions: [HealthDataAccess.READ]);
-    if (requested) {
-      try {
-        List<HealthDataPoint> healthData = await health.getHealthDataFromTypes(
-            from, to, [HealthDataType.BLOOD_PRESSURE_SYSTOLIC]);
-        systolicpressureDataList.addAll(healthData);
-      } catch (error) {
-        print("Exception in getHealthDataFromTypes: $error");
-      }
-      systolicpressureDataList =
-          HealthFactory.removeDuplicates(systolicpressureDataList);
-
-      if (systolicpressureDataList.isEmpty) {
-        emit(SystolicpressureNotFetchedState());
-      } else {
-        emit(SystolicpressureFetchedSucessfullyState());
-      }
-    } else {
-      print("Authorization not granted");
-      emit(SystolicpressureAuthorizationNotGrantedState());
-    }
-    // systolicpressureDataList.forEach((x) {
-    //   print(x);
-    // });
-    return systolicpressureDataList;
-  }
-
-  // fetch DiastolicPressure
-  Future fetchDiastolicPressure(
-      {required final from, required final to}) async {
-    emit(DiastolicpressureStartFetchedState());
-    List<HealthDataPoint> diastolicpressureDataList = [];
-    bool requested = await health.requestAuthorization(
-        [HealthDataType.BLOOD_PRESSURE_DIASTOLIC],
-        permissions: [HealthDataAccess.READ]);
-    if (requested) {
-      try {
-        List<HealthDataPoint> healthData = await health.getHealthDataFromTypes(
-            from, to, [HealthDataType.BLOOD_PRESSURE_DIASTOLIC]);
-
-        diastolicpressureDataList.addAll(healthData);
-      } catch (error) {
-        print("Exception in getHealthDataFromTypes: $error");
-      }
-      diastolicpressureDataList =
-          HealthFactory.removeDuplicates(diastolicpressureDataList);
-
-      if (diastolicpressureDataList.isEmpty) {
-        emit(DiastolicpressureNotFetchedState());
-      } else {
-        emit(DiastolicpressureFetchedSucessfullyState());
-        // print(diastolicpressureDataList);
-      }
-    } else {
-      print("Authorization not granted");
-      emit(DiastolicpressureAuthorizationNotGrantedState());
-    }
-    // diastolicpressureDataList.forEach((x) {
-    //   print(x);
-    // });
-    return diastolicpressureDataList;
-  }
-
-  // ---------------------------------------------------------------------------
-
-  /// Fetch data points from the health plugin and show them in the app.
-  Future fetchData() async {
-    print('hello from fetch data');
-    emit(FetchingDataFromGoogleFitState());
-
-    // setState(() => _state = AppState.FETCHING_DATA);
-    // define the types to get
-    final types = [
-      HealthDataType.STEPS,
-      HealthDataType.HEART_RATE,
-      HealthDataType.ACTIVE_ENERGY_BURNED,
-      HealthDataType.BLOOD_PRESSURE_SYSTOLIC,
-      HealthDataType.BLOOD_PRESSURE_DIASTOLIC,
-
-      HealthDataType.WEIGHT,
-      HealthDataType.HEIGHT,
-      HealthDataType.BLOOD_GLUCOSE,
-      HealthDataType.BLOOD_OXYGEN,
-      HealthDataType.BODY_TEMPERATURE,
-
-      // HealthDataType.BASAL_ENERGY_BURNED,
-      // HealthDataType.BODY_FAT_PERCENTAGE,
-      // HealthDataType.BODY_MASS_INDEX,
-      // HealthDataType.DIETARY_CARBS_CONSUMED,
-      // HealthDataType.DIETARY_ENERGY_CONSUMED,
-      // HealthDataType.DIETARY_FATS_CONSUMED,
-      // HealthDataType.DIETARY_PROTEIN_CONSUMED,
-      // HealthDataType.FORCED_EXPIRATORY_VOLUME,
-      // HealthDataType.HEART_RATE_VARIABILITY_SDNN,
-      // HealthDataType.RESTING_HEART_RATE,
-      // HealthDataType.WAIST_CIRCUMFERENCE,
-      // HealthDataType.WALKING_HEART_RATE,
-      // HealthDataType.DISTANCE_WALKING_RUNNING,
-      // HealthDataType.FLIGHTS_CLIMBED,
-      // HealthDataType.MOVE_MINUTES,
-      // HealthDataType.DISTANCE_DELTA,
-      // HealthDataType.MINDFULNESS,
-      // HealthDataType.WATER,
-      // SLEEP_IN_BED,
-      // HealthDataType.SLEEP_ASLEEP,
-      // HealthDataType.SLEEP_AWAKE,
-      // HealthDataType.EXERCISE_TIME,
-      // HealthDataType.WORKOUT,
-      // HealthDataType.HEADACHE_NOT_PRESENT,
-      // HealthDataType.HEADACHE_MILD,
-      // HealthDataType.HEADACHE_MODERATE,
-      // HealthDataType.HEADACHE_SEVERE,
-      // HealthDataType.HEADACHE_UNSPECIFIED,
-    ];
-
-    // with coresponsing permissions
-    final permissions = [
-      HealthDataAccess.READ,
-      HealthDataAccess.READ,
-      HealthDataAccess.READ,
-      HealthDataAccess.READ,
-      HealthDataAccess.READ,
-      HealthDataAccess.READ,
-      HealthDataAccess.READ,
-      HealthDataAccess.READ,
-      HealthDataAccess.READ,
-      HealthDataAccess.READ,
-    ];
-
-    // get data within the last 24 hours
-    final now = DateTime.now();
-    final yesterday = now.subtract(Duration(days: 1));
-    final lastmonth = now.subtract(Duration(days: 30));
-
-    bool requested =
-        await health.requestAuthorization(types, permissions: permissions);
-
-    if (requested) {
-      try {
-        // fetch health data
-        List<HealthDataPoint> healthData =
-            // await health.getHealthDataFromTypes(yesterday, now, types);
-            await health.getHealthDataFromTypes(lastmonth, now, types);
-
-        // save all the new data points (only the first 100)
-        healthDataList.addAll((healthData.length < 100)
-            ? healthData
-            : healthData.sublist(0, 100));
-      } catch (error) {
-        print("Exception in getHealthDataFromTypes: $error");
-      }
-
-      // filter out duplicates
-      healthDataList = HealthFactory.removeDuplicates(healthDataList);
-
-      // print the results
-      healthDataList.forEach((x) {
-        print(x);
-        if (x.typeString == 'ACTIVE_ENERGY_BURNED') {
-          lastDateEnergyBurned = x;
-        }
-        if (x.typeString == 'BLOOD_PRESSURE_SYSTOLIC') {
-          lastDateBloodPressureSystolic = x;
-        }
-
-        if (x.typeString == 'BLOOD_GLUCOSE') {
-          lastDateBloodGlucose = x;
-        }
-        if (x.typeString == 'STEPS') {
-          lastDateSteps = x;
-        }
-
-        if (x.typeString == 'BLOOD_PRESSURE_DIASTOLIC') {
-          lastDateBloodPressureDiastolic = x;
-        }
-        if (x.typeString == 'BLOOD_OXYGEN') {
-          lastDateBloodOxygen = x;
-        }
-
-        if (x.typeString == 'BODY_TEMPERATURE') {
-          lastDateBodyTemperatur = x;
-        }
-        if (x.typeString == 'HEART_RATE') {
-          lastDateHeartRate = x;
-        }
-
-        if (x.typeString == 'HEIGHT') {
-          lastDateHeight = x;
-        }
-        if (x.typeString == 'WEIGHT') {
-          lastDateWeight = x;
-        }
-        // if (x.typeString != 'ACTIVE_ENERGY_BURNED' ||
-        //     x.typeString != 'BLOOD_PRESSURE_SYSTOLIC' ||
-        //     x.typeString != 'BLOOD_GLUCOSE' ||
-        //     x.typeString != 'STEPS' ||
-        //     x.typeString != 'BLOOD_PRESSURE_DIASTOLIC' ||
-        //     x.typeString != 'BLOOD_OXYGEN' ||
-        //     x.typeString != 'BODY_TEMPERATURE' ||
-        //     x.typeString != 'HEART_RATE') {
-        //   print(x.typeString);
-        // }
-      });
-
-      if (healthDataList.isEmpty) {
-        emit(NoDataFromGoogleFitState());
-      } else {
-        emit(DataReadyFromGoogleFitState());
-      }
-    } else {
-      print("Authorization not granted");
-      emit(DataNotFetchedFromGoogleFitState());
-      // setState(() => _state = AppState.DATA_NOT_FETCHED);
-    }
-  }
-
-  /// Fetch steps from the health plugin and show them in the app.
-  Future fetchStepData() async {
-    int? steps;
-
-    // get steps for today (i.e., since midnight)
-    final now = DateTime.now();
-    // final midnight = DateTime(now.year, now.month, now.day);
-    final before_hour = now.subtract(const Duration(hours: 1));
-
-    bool requested = await health.requestAuthorization([HealthDataType.STEPS]);
-
-    if (requested) {
-      try {
-        steps = await health.getTotalStepsInInterval(before_hour, now);
-        // steps = await health.getTotalStepsInInterval(midnight, now);
-
-        print(steps);
-        // print(midnight);
-        print(now);
-      } catch (error) {
-        print("Caught exception in getTotalStepsInInterval: $error");
-      }
-
-      print('Total number of steps: $steps');
-      emit(FetchingStepsFromGoogleFitState());
-
-      if (steps == null) {
-        nofsteps = 0;
-        emit(NoStepsFromGoogleFitState());
-      } else {
-        nofsteps = steps;
-        emit(StepsReadyFromGoogleFitState());
-      }
-
-      // setState(() {
-      //   nofsteps = (steps == null) ? 0 : steps;
-      //   _state = (steps == null) ? AppState.NO_DATA : AppState.STEPS_READY;
-      // });
-    } else {
-      print("Authorization not granted");
-      emit(StepsNotFetchedFromGoogleFitState());
-      // setState(() => _state = AppState.DATA_NOT_FETCHED);
-    }
-  }
-
-  Widget _contentFetchingData() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        Container(
-            padding: EdgeInsets.all(20),
-            child: CircularProgressIndicator(
-              strokeWidth: 10,
-            )),
-        Text('Fetching data...')
-      ],
-    );
-  }
-
-  Widget _contentDataReady() {
-    return ListView.builder(
-        itemCount: healthDataList.length,
-        itemBuilder: (_, index) {
-          HealthDataPoint p = healthDataList[index];
-          return ListTile(
-            title: Text("${p.typeString}: ${p.value}"),
-            trailing: Text('${p.unitString}'),
-            subtitle: Text('${p.dateFrom} - ${p.dateTo}'),
-          );
-        });
-  }
-
-  Widget _contentNoData() {
-    return Text('No Data to show');
-  }
-
-  Widget _contentNotFetched() {
-    return Column(
-      children: [
-        Text('Press the download button to fetch data.'),
-        Text('Press the plus button to insert some random data.'),
-        Text('Press the walking button to get total step count.'),
-      ],
-      mainAxisAlignment: MainAxisAlignment.center,
-    );
-  }
-
-  Widget _authorizationNotGranted() {
-    return Text('Authorization not given. '
-        'For Android please check your OAUTH2 client ID is correct in Google Developer Console. '
-        'For iOS check your permissions in Apple Health.');
-  }
-
-  Widget _dataAdded() {
-    return Text('$nofsteps steps and $_mgdl mgdl are inserted successfully!');
-  }
-
-  Widget _stepsFetched() {
-    return Text('Total number of steps: $nofsteps');
-  }
-
-  Widget _dataNotAdded() {
-    return Text('Failed to add data');
-  }
+  // ------------------------------------------------------
 
   final now = DateTime.now();
-  final yesterday = DateTime.now().subtract(Duration(days: 2));
   final lastmonth = DateTime.now().subtract(Duration(days: 10));
 
   Future<void> refreshandfetch() =>
@@ -661,6 +212,11 @@ class GPCubit extends Cubit<GPStates> {
         DateTime fetch_steps_from_date;
         DateTime fetch_hr_from_date;
         DateTime fetch_calories_from_date;
+        DateTime fetch_weight_from_date;
+        DateTime fetch_height_from_date;
+        DateTime fetch_glucose_from_date;
+        DateTime fetch_fat_insuline;
+        DateTime fetch_temperatur_carbohydrates;
 
         List<Map> last_date_in_steps_db = await _sqlDb.readData(
             "SELECT `stepsdate` FROM 'stepstable' ORDER BY `id` DESC LIMIT 1");
@@ -668,6 +224,18 @@ class GPCubit extends Cubit<GPStates> {
             "SELECT `hrdate` FROM 'hrtable' ORDER BY `id` DESC LIMIT 1");
         List<Map> last_date_in_calories_db = await _sqlDb.readData(
             "SELECT `caloriesdate` FROM 'caloriestable' ORDER BY `id` DESC LIMIT 1");
+
+        List<Map> last_date_in_weight_db = await _sqlDb.readData(
+            "SELECT `weightsdate` FROM 'weighttable' ORDER BY `id` DESC LIMIT 1");
+        List<Map> last_date_in_height_db = await _sqlDb.readData(
+            "SELECT `heightdate` FROM 'heighttable' ORDER BY `id` DESC LIMIT 1");
+        List<Map> last_date_in_glucose_db = await _sqlDb.readData(
+            "SELECT `Glucosedate` FROM 'Glucosetable' ORDER BY `id` DESC LIMIT 1");
+
+        List<Map> last_date_in_Insulin_db = await _sqlDb.readData(
+            "SELECT `Insulindate` FROM 'Insulintable' ORDER BY `id` DESC LIMIT 1");
+        List<Map> last_date_in_Carbohydrates_db = await _sqlDb.readData(
+            "SELECT `Carbohydratesdate` FROM 'Carbohydratestable' ORDER BY `id` DESC LIMIT 1");
 
         if (last_date_in_steps_db.isEmpty) {
           print('last_date_in_steps_db is Empty');
@@ -694,9 +262,55 @@ class GPCubit extends Cubit<GPStates> {
                   '${last_date_in_calories_db[0].values.toString().substring(1, 23)}')
               .add(Duration(seconds: 2));
         }
+
+        if (last_date_in_weight_db.isEmpty) {
+          print('last_date_in_weight_db is Empty');
+          fetch_weight_from_date = lastmonth;
+        } else {
+          fetch_weight_from_date = DateTime.parse(
+                  '${last_date_in_weight_db[0].values.toString().substring(1, 23)}')
+              .add(Duration(seconds: 2));
+        }
+
+        if (last_date_in_height_db.isEmpty) {
+          print('last_date_in_height_db is Empty');
+          fetch_height_from_date = lastmonth;
+        } else {
+          fetch_height_from_date = DateTime.parse(
+                  '${last_date_in_height_db[0].values.toString().substring(1, 23)}')
+              .add(Duration(seconds: 2));
+        }
+
+        if (last_date_in_glucose_db.isEmpty) {
+          print('last_date_in_glucose_db is Empty');
+          fetch_glucose_from_date = lastmonth;
+        } else {
+          fetch_glucose_from_date = DateTime.parse(
+                  '${last_date_in_glucose_db[0].values.toString().substring(1, 23)}')
+              .add(Duration(seconds: 2));
+        }
+
+        if (last_date_in_Insulin_db.isEmpty) {
+          print('last_date_in_Insulin_db is Empty');
+          fetch_fat_insuline = lastmonth;
+        } else {
+          fetch_fat_insuline = DateTime.parse(
+                  '${last_date_in_Insulin_db[0].values.toString().substring(1, 23)}')
+              .add(Duration(seconds: 2));
+        }
+
+        if (last_date_in_Carbohydrates_db.isEmpty) {
+          print('last_date_in_Carbohydrates_db is Empty');
+          fetch_temperatur_carbohydrates = lastmonth;
+        } else {
+          fetch_temperatur_carbohydrates = DateTime.parse(
+                  '${last_date_in_Carbohydrates_db[0].values.toString().substring(1, 23)}')
+              .add(Duration(seconds: 2));
+        }
+
         // Fetch Steps from google fit and insert it in stepstable in the sql database
-        List<HealthDataPoint> _steps =
-            await fetchSteps(from: fetch_steps_from_date, to: now);
+        List<HealthDataPoint> _steps = await ConstantFunctinsCubit()
+            .fetchSteps(from: fetch_steps_from_date, to: now);
 
         _steps.forEach((element) async {
           int steps_response = await _sqlDb.insertData(
@@ -705,16 +319,16 @@ class GPCubit extends Cubit<GPStates> {
         });
 
         // Fetch Heart rate from google fit and insert it in stepstable in the sql database
-        List<HealthDataPoint> _hr =
-            await fetchHeartRate(from: fetch_hr_from_date, to: now);
+        List<HealthDataPoint> _hr = await ConstantFunctinsCubit()
+            .fetchHeartRate(from: fetch_hr_from_date, to: now);
         _hr.forEach((element) async {
           int hr_response = await _sqlDb.insertData(
               "INSERT INTO `hrtable` ( `hrdate`, `hrvalue` ) VALUES ( '${element.dateTo}' , ${element.value})");
           print('Insert Hr value in index Number ${hr_response}');
         });
         // Fetch Calories from google fit and insert it in stepstable in the sql database
-        List<HealthDataPoint> _calories =
-            await fetchCalories(from: fetch_calories_from_date, to: now);
+        List<HealthDataPoint> _calories = await ConstantFunctinsCubit()
+            .fetchCalories(from: fetch_calories_from_date, to: now);
         _calories.forEach((element) async {
           print(element.dateFrom);
           print(element.dateTo);
@@ -730,60 +344,60 @@ class GPCubit extends Cubit<GPStates> {
           print('Insert calories value in index Number ${calories_response}');
         });
 
-        // Fetch fetchSystolicPressure from google fit and insert it in stepstable in the sql database
-        // fetchSystolicPressure(from: lastmonth, to: now);
+        // Fetch Weight from google fit and insert it in weighttable in the sql database
+        List<HealthDataPoint> _weightList = await ConstantFunctinsCubit()
+            .fetchWeight(from: fetch_weight_from_date, to: now);
+        _weightList.forEach((element) async {
+          int weight_response = await _sqlDb.insertData(
+              "INSERT INTO `weighttable` ( `weightsdate`, `weightvalue` ) VALUES ( '${element.dateTo}' , ${element.value})");
+          print('Insert Weight value in index Number ${weight_response}');
+        });
+
+        // Fetch Height from google fit and insert it in heighttable in the sql database
+        List<HealthDataPoint> _heightList = await ConstantFunctinsCubit()
+            .fetchHeight(from: fetch_height_from_date, to: now);
+        _heightList.forEach((element) async {
+          int height_response = await _sqlDb.insertData(
+              "INSERT INTO `heighttable` ( `heightdate`, `heightvalue` ) VALUES ( '${element.dateTo}' , ${element.value})");
+          print('Insert Height value in index Number ${height_response}');
+        });
+
+        // Fetch Glucose from google fit and insert it in Glucosetable in the sql database
+        List<HealthDataPoint> _glucoseList = await ConstantFunctinsCubit()
+            .fetchBloodGlucose(from: fetch_glucose_from_date, to: now);
+        _glucoseList.forEach((element) async {
+          print(element);
+          int glucose_response = await _sqlDb.insertData(
+              "INSERT INTO `Glucosetable` ( `Glucosedate`, `Glucosevalue` ) VALUES ( '${element.dateTo}' , ${element.value})");
+          print('Insert Glucose value in index Number ${glucose_response}');
+        });
+
+        // Fetch fat_insuline from google fit and insert it in Glucosetable in the sql database
+        List<HealthDataPoint> _insulineList = await ConstantFunctinsCubit()
+            .fetchFatInsuline(
+                from: fetch_fat_insuline, to: now);
+        _insulineList.forEach((element) async {
+          print(element);
+          int insuline_response = await _sqlDb.insertData(
+              "INSERT INTO `Insulintable` ( `Insulindate`, `Insulinvalue` ) VALUES ( '${element.dateTo}' , ${element.value})");
+          print('Insert Insuline value in index Number ${insuline_response}');
+        });
+
+        // Fetch  Temperatur_carbohydrates from google fit and insert it in Glucosetable in the sql database
+        List<HealthDataPoint> _carbohydratesList = await ConstantFunctinsCubit()
+            .fetchTemperaturCarbohydrates(
+                from: fetch_temperatur_carbohydrates, to: now);
+        _carbohydratesList.forEach((element) async {
+          print(element);
+          int carbohydrates_response = await _sqlDb.insertData(
+              "INSERT INTO `Carbohydratestable` ( `Carbohydratesdate`, `Carbohydratesvalue` ) VALUES ( '${element.dateTo}' , ${element.value})");
+          print(
+              'Insert Carbohydrates value in index Number ${carbohydrates_response}');
+        });
 
         emit(RefreshAndFetchDataState());
-
-        // //*******************
-        // fetchData();
-        // fetchStepData();
-        // fetchData();
       });
-
-// Data
-  // Future fetchStepDataSpecificDay() async {
-  //   int? steps;
-  //   final now = DateTime.now();
-  //   final midnight = DateTime(now.year, now.month, now.day);
-  //   final before_hour = now.subtract(const Duration(hours: 1));
-
-  //   bool requested = await health.requestAuthorization([HealthDataType.STEPS]);
-
-  //   if (requested) {
-  //     try {
-  //       steps = await health.getTotalStepsInInterval(before_hour, now);
-  //       // steps = await health.getTotalStepsInInterval(midnight, now);
-
-  //       print(steps);
-  //       print(midnight);
-  //       print(now);
-  //     } catch (error) {
-  //       print("Caught exception in getTotalStepsInInterval: $error");
-  //     }
-
-  //     print('Total number of steps: $steps');
-  //     emit(Fetchingfetch_from_dateGoogleFitState());
-
-  //     if (steps == null) {
-  //       nofsteps = 0;
-  //       emit(Nofetch_from_dateGoogleFitState());
-  //     } else {
-  //       nofsteps = steps;
-  //       emit(StepsReadyFromGoogleFitState());
-  //     }
-
-  //     // setState(() {
-  //     //   nofsteps = (steps == null) ? 0 : steps;
-  //     //   _state = (steps == null) ? AppState.NO_DATA : AppState.STEPS_READY;
-  //     // });
-  //   } else {
-  //     print("Authorization not granted");
-  //     emit(StepsNotFetchedFromGoogleFitState());
-  //     // setState(() => _state = AppState.DATA_NOT_FETCHED);
-  //   }
-  // }
-
+// -----------------------------------------------------------------------------------------------------------
 // Handle Phone Number
   bool isupdated = false;
   late String doc_num;
@@ -862,5 +476,19 @@ class GPCubit extends Cubit<GPStates> {
     }
 
     emit(ModelCycleOFFState());
+  }
+
+  // Weight and Height
+  bool isBottomSheetShown = false;
+  IconData fabIcon = Icons.edit;
+
+  void changeBottomSheetState({
+    required bool isShow,
+    required IconData icon,
+  }) {
+    isBottomSheetShown = isShow;
+    fabIcon = icon;
+
+    emit(AppChangeBottomSheetState());
   }
 }

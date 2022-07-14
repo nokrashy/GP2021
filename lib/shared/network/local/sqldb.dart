@@ -17,7 +17,7 @@ class SqlDb {
     String databasepath = await getDatabasesPath();
     String path = join(databasepath, 'esam.db');
     Database mydb = await openDatabase(path,
-        onCreate: _onCreate, version: 1, onUpgrade: _onUpgrade);
+        onCreate: _onCreate, version: 4, onUpgrade: _onUpgrade);
     print('path');
     print(path);
     return mydb;
@@ -55,6 +55,40 @@ class SqlDb {
         `caloriesdate` DATETIME NOT NULL,
         `caloriesvalue` VARCHAR NOT NULL,
         `untillcaloriesdate` DATETIME NOT NULL)
+    ''');
+
+    batch.execute('''
+      CREATE TABLE `weighttable` (
+        `id` INTEGER  NOT NULL PRIMARY KEY  AUTOINCREMENT,
+        `weightsdate` DATETIME NOT NULL,
+        `weightvalue` VARCHAR NOT NULL)
+    ''');
+    batch.execute('''
+      CREATE TABLE `heighttable` (
+        `id` INTEGER  NOT NULL PRIMARY KEY  AUTOINCREMENT,
+        `heightdate` DATETIME NOT NULL,
+        `heightvalue` VARCHAR NOT NULL)
+    ''');
+    batch.execute('''
+      CREATE TABLE `Glucosetable` (
+        `id` INTEGER  NOT NULL PRIMARY KEY  AUTOINCREMENT,
+        `Glucosedate` DATETIME NOT NULL,
+        `Glucosevalue` VARCHAR NOT NULL)
+    ''');
+    
+    // Insulin => BODY_FAT_PERCENTAGE
+    batch.execute('''
+      CREATE TABLE `Insulintable` (
+        `id` INTEGER  NOT NULL PRIMARY KEY  AUTOINCREMENT,
+        `Insulindate` DATETIME NOT NULL,
+        `Insulinvalue` VARCHAR NOT NULL)
+    ''');
+    // Carbohydrates => BODY_TEMPERATURE
+    batch.execute('''
+      CREATE TABLE `Carbohydratestable` (
+        `id` INTEGER  NOT NULL PRIMARY KEY  AUTOINCREMENT,
+        `Carbohydratesdate` DATETIME NOT NULL,
+        `Carbohydratesvalue` VARCHAR NOT NULL)
     ''');
 
     batch.commit();

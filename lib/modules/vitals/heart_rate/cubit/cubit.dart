@@ -83,12 +83,42 @@ class HrCubit extends Cubit<HrStates> {
     int _max_hr = 0;
     List<Map> _response = await _sqlDb.readData(
         "SELECT * FROM 'hrtable' WHERE `hrdate` > '${from}' AND `hrdate` < '${to}'");
+    List<Map> new_response = [];
+
+    for (int i = 0; i < 24; i++) {
+      print(from!.add(new Duration(hours: 1)));
+
+      List<Map> _newresponse = await _sqlDb.readData(
+          "SELECT `hrvalue` FROM 'hrtable' WHERE `hrdate` > '${from.add(new Duration(hours: i))}' AND `hrdate` < '${from.add(new Duration(hours: (i + 1)))}'");
+      double sum = 0;
+      _newresponse.forEach((element) {
+        sum += double.parse(element['hrvalue']);
+      });
+
+      if ((sum / _newresponse.length).isNaN) {
+        new_response.add({'${from.add(new Duration(hours: (i + 1)))}': 0});
+      } else {
+        new_response.add({
+          '${from.add(new Duration(hours: (i + 1)))}':
+              (sum / _newresponse.length).toInt()
+        });
+      }
+    }
+    // print(new_response);
+
+    new_response.forEach((element) {
+      // print("Date ${element['hrdate']}  => ${element['hrvalue']}");
+
+      print(element.keys.single.toString());
+
+      _getChartData.add(ChartData(
+          DateTime.parse(element.keys.single.toString()),
+          double.parse(element.values.single.toString()).round()));
+    });
 
     _response.forEach((element) {
-      print(element['hrdate']);
-      _getChartData.add(ChartData(DateTime.parse(element['hrdate']),
-          double.parse('${element['hrvalue']}').round()));
       current_value = double.parse('${element['hrvalue']}').round();
+
       if (current_value > _max_hr) {
         _max_hr = current_value;
       }

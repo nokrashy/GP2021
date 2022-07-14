@@ -13,17 +13,10 @@ import '../vitals/height.dart';
 import '../vitals/weight.dart';
 
 class Infoscreen extends StatelessWidget {
-  bool showData = false;
-  bool showSteps = false;
-
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<GPCubit, GPStates>(
-      listener: (context, state) {
-        var cubit = GPCubit.get(context);
-        if (state is StepsReadyFromGoogleFitState) showSteps = true;
-        if (state is DataReadyFromGoogleFitState) showData = true;
-      },
+      listener: (context, state) {},
       builder: (context, state) {
         var cubit = GPCubit.get(context);
         return Scaffold(

@@ -16,6 +16,8 @@ import 'package:fristapp/shared/styles/bloc_observer.dart';
 import 'package:fristapp/shared/styles/themes.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:permission_handler/permission_handler.dart';
+import 'layout/cubit/Constant/google_fit_functions.dart';
+import 'layout/cubit/Constant/google_fit_functions.dart';
 import 'modules/login/login_screen.dart';
 import 'modules/on_boarding/on_boarding_screen.dart';
 import 'modules/vitals/heart_rate/cubit/cubit.dart';
@@ -81,8 +83,10 @@ class MyApp extends StatelessWidget {
             // ..fetchData()
             // ..fetchStepData()
             ),
+        BlocProvider(create: (context) => ConstantFunctinsCubit()),
         BlocProvider(create: (context) => StepsCubit()),
         BlocProvider(create: (context) => HrCubit()),
+        
       ],
       child: BlocConsumer<GPCubit, GPStates>(
         listener: (context, state) {},

@@ -385,6 +385,15 @@ class Settingsscreen extends StatelessWidget {
                         // 01017253775
                         print('Done');
                       }),
+                      SizedBox(
+                        height: 10,
+                      ),
+                  RaisedButton(
+                      child: Text('ADD data to google fit'),
+                      onPressed: () async {
+                        cubit.addData();
+                        print('Data Added');
+                      }),
                 ],
               ),
             ),

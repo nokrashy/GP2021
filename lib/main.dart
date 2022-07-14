@@ -20,6 +20,7 @@ import 'layout/cubit/Constant/google_fit_functions.dart';
 import 'layout/cubit/Constant/google_fit_functions.dart';
 import 'modules/login/login_screen.dart';
 import 'modules/on_boarding/on_boarding_screen.dart';
+import 'modules/vitals/blood_glucose/cubit/cubit.dart';
 import 'modules/vitals/heart_rate/cubit/cubit.dart';
 import 'modules/vitals/steps/cubit/cubit.dart';
 
@@ -86,6 +87,8 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => ConstantFunctinsCubit()),
         BlocProvider(create: (context) => StepsCubit()),
         BlocProvider(create: (context) => HrCubit()),
+        BlocProvider(create: (context) => GlucoseCubit()),
+        
         
       ],
       child: BlocConsumer<GPCubit, GPStates>(

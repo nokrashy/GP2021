@@ -9,6 +9,7 @@ import 'package:fristapp/shared/component/component.dart';
 import 'package:fristapp/shared/styles/MyIcon.dart.dart';
 import 'package:fristapp/shared/styles/icon_broken.dart';
 
+import '../vitals/blood_glucose/blood_glucose.dart';
 import '../vitals/height.dart';
 import '../vitals/weight.dart';
 
@@ -42,8 +43,7 @@ class Infoscreen extends StatelessWidget {
                           GestureDetector(
                             onTap: () {
                               print('*************************');
-                              print('Blood Pressure');
-                              // NavigetTo(context, BloodOxygen());
+                              NavigetTo(context, GlucoseRate());
                             },
                             child: InfoCard(
                               title: 'Blood Glucose',

@@ -1,24 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fristapp/modules/vitals/heart_rate/cubit/cubit.dart';
-import 'package:fristapp/modules/vitals/heart_rate/cubit/states.dart';
-import 'package:fristapp/modules/vitals/heart_rate/heart_rate.dart';
-import 'package:fristapp/shared/component/component.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:fristapp/modules/vitals/blood_glucose/cubit/cubit.dart';
+import 'package:fristapp/modules/vitals/blood_glucose/cubit/states.dart';
 import 'package:intl/intl.dart';
-import '../../../model/chart_data_model.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 
-class ActivityHR extends StatelessWidget {
+import '../../../model/chart_data_model.dart';
+import '../../../shared/component/component.dart';
+
+class ActivityGlucose extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<HrCubit, HrStates>(
+    return BlocConsumer<GlucoseCubit, GlucoseStates>(
       listener: (context, state) {
-        if (state is HrChangeTopNavBarState) {
-          HrCubit.get(context).changetopNavBartoDay();
+        if (state is GlucoseChangeTopNavBarState) {
+          GlucoseCubit.get(context).changetopNavBartoDay();
         }
       },
       builder: (context, state) {
-        var cubit = HrCubit.get(context);
+        var cubit = GlucoseCubit.get(context);
         late List<ChartData> _ChartData = cubit.getChartDatafcn();
         late TooltipBehavior _tooltipBehavior = TooltipBehavior(enable: true);
         List<Map<dynamic, dynamic>> snapshot = cubit.getrsponse();
@@ -39,7 +39,7 @@ class ActivityHR extends StatelessWidget {
                               '${cubit.selectedate.toString().substring(0, 10)}'),
                       series: <ChartSeries>[
                         ScatterSeries<ChartData, DateTime>(
-                          name: 'Heart Rate',
+                          name: 'Glucose Rate',
                           dataSource: _ChartData,
                           xValueMapper: (ChartData data, _) => data.x,
                           yValueMapper: (ChartData data, _) => data.y,
@@ -66,7 +66,7 @@ class ActivityHR extends StatelessWidget {
                   ),
                   ListTile(
                       leading: Text('Time'),
-                      title: Center(child: Text('Heart Rate')),
+                      title: Center(child: Text('Glucose Rate')),
                       trailing: Text('Unite')),
                   ListView.builder(
                     physics: NeverScrollableScrollPhysics(),
@@ -79,9 +79,9 @@ class ActivityHR extends StatelessWidget {
                             child: ListTile(
                               title: Center(
                                   child: Text(
-                                      '${double.parse(snapshot[index]['hrvalue']).round()}')),
+                                      '${double.parse(snapshot[index]['Glucosevalue']).round()}')),
                               leading: Text(
-                                  '${snapshot[index]['hrdate'].toString().substring(10, 16)}'),
+                                  '${snapshot[index]['Glucosedate'].toString().substring(10, 16)}'),
                               trailing: Text('Bpm'),
                             ),
                           ),

@@ -5,6 +5,7 @@ import 'package:fristapp/modules/vitals/steps/cubit/states.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:intl/intl.dart';
 import '../../../model/chart_data_model.dart';
+import '../../../shared/component/component.dart';
 
 class ActivitySteps extends StatelessWidget {
   @override
@@ -55,6 +56,17 @@ class ActivitySteps extends StatelessWidget {
                       primaryYAxis: NumericAxis(labelFormat: '{value}'),
                     ),
                   ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  MyDivider(),
+                  SizedBox(
+                    height: 5,
+                  ),
+                  ListTile(
+                      leading: Text('Time'),
+                      title: Center(child: Text('Steps Count')),
+                      trailing: Text('Unite')),
                   ListView.builder(
                     physics: NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
@@ -64,8 +76,12 @@ class ActivitySteps extends StatelessWidget {
                         children: [
                           Card(
                             child: ListTile(
-                              title: Text('${snapshot[index]['stepsvalue']}'),
-                              leading: Text('${snapshot[index]['stepsdate']}'),
+                              title: Center(
+                                  child:
+                                      Text('${snapshot[index]['stepsvalue']}')),
+                              leading: Text(
+                                  '${snapshot[index]['stepsdate'].toString().substring(10, 16)}'),
+                              trailing: Text('Steps'),
                             ),
                           ),
                         ],

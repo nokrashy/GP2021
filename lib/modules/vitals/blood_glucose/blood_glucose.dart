@@ -14,7 +14,7 @@ class GlucoseRate extends StatelessWidget {
           child: Scaffold(
             appBar: AppBar(
               title: Text(
-                "Glucose Rate",
+                "Blood Glucose",
                 style: TextStyle(
                   fontWeight: FontWeight.normal,
                   fontSize: 18.0,

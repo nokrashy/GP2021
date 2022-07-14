@@ -39,7 +39,7 @@ class ActivityGlucose extends StatelessWidget {
                               '${cubit.selectedate.toString().substring(0, 10)}'),
                       series: <ChartSeries>[
                         ScatterSeries<ChartData, DateTime>(
-                          name: 'Glucose Rate',
+                          name: 'Blood Glucose',
                           dataSource: _ChartData,
                           xValueMapper: (ChartData data, _) => data.x,
                           yValueMapper: (ChartData data, _) => data.y,
@@ -66,7 +66,7 @@ class ActivityGlucose extends StatelessWidget {
                   ),
                   ListTile(
                       leading: Text('Time'),
-                      title: Center(child: Text('Glucose Rate')),
+                      title: Center(child: Text('Blood Glucose')),
                       trailing: Text('Unite')),
                   ListView.builder(
                     physics: NeverScrollableScrollPhysics(),
@@ -82,7 +82,7 @@ class ActivityGlucose extends StatelessWidget {
                                       '${double.parse(snapshot[index]['Glucosevalue']).round()}')),
                               leading: Text(
                                   '${snapshot[index]['Glucosedate'].toString().substring(10, 16)}'),
-                              trailing: Text('Bpm'),
+                              trailing: Text('mmol/L'),
                             ),
                           ),
                         ],

@@ -47,7 +47,7 @@ class DateGlucose extends StatelessWidget {
                         color: Color.fromARGB(255, 187, 224, 255),
                         child: Center(
                           child: Text(
-                            'Heart Rate',
+                            'Blood Glucose',
                             style: TextStyle(
                               fontSize: 20.0,
                               color: Colors.blue,
@@ -69,7 +69,7 @@ class DateGlucose extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Heart Rate Analysis',
+                                  'Blood Glucose Analysis',
                                   style: TextStyle(
                                     fontSize: 20.0,
                                   ),

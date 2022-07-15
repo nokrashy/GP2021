@@ -10,8 +10,8 @@ import 'package:fristapp/shared/styles/MyIcon.dart.dart';
 import 'package:fristapp/shared/styles/icon_broken.dart';
 
 import '../vitals/blood_glucose/blood_glucose.dart';
-import '../vitals/height.dart';
-import '../vitals/weight.dart';
+import '../vitals/height/height.dart';
+import '../vitals/weight/weight.dart';
 
 class Infoscreen extends StatelessWidget {
   @override
@@ -108,6 +108,7 @@ class Infoscreen extends StatelessWidget {
                           ),
                           GestureDetector(
                             onTap: () {
+                              
                               NavigetTo(context, Weight());
                             },
                             child: InfoCard(

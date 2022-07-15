@@ -67,4 +67,3 @@ class ModelCycleState extends GPStates {}
 
 class ModelCycleOFFState extends GPStates {}
 
-class AppChangeBottomSheetState extends GPStates {}

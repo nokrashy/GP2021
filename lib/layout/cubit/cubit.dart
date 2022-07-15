@@ -181,7 +181,7 @@ class GPCubit extends Cubit<GPStates> {
     bool _success6 = await health.writeHealthData(
         (_height! * 0.01), HealthDataType.HEIGHT, now, now);
     bool _success7 =   await health
-          .writeHealthData(1, HealthDataType.BODY_FAT_PERCENTAGE, now, now);
+          .writeHealthData(_fat_insuline!, HealthDataType.BODY_FAT_PERCENTAGE, now, now);
     bool _success8 = await health.writeHealthData(
         _temperatur_carbohydrates!, HealthDataType.BODY_TEMPERATURE, now, now);
 
@@ -477,18 +477,10 @@ class GPCubit extends Cubit<GPStates> {
 
     emit(ModelCycleOFFState());
   }
+      
 
-  // Weight and Height
-  bool isBottomSheetShown = false;
-  IconData fabIcon = Icons.edit;
 
-  void changeBottomSheetState({
-    required bool isShow,
-    required IconData icon,
-  }) {
-    isBottomSheetShown = isShow;
-    fabIcon = icon;
+  
 
-    emit(AppChangeBottomSheetState());
-  }
+  
 }

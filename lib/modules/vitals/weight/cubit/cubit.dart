@@ -77,7 +77,7 @@ class WeightCubit extends Cubit<WeightStates> {
   DateTime getSelectedate() {
     return selectedate;
   }
-HealthFactory health = HealthFactory();
+ HealthFactory health = HealthFactory();
   addWeightToGooglefit({weight,date})async{
     bool _success =
         await health.writeHealthData(weight!, HealthDataType.WEIGHT, date, date);

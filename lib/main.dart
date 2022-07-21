@@ -22,7 +22,9 @@ import 'modules/login/login_screen.dart';
 import 'modules/on_boarding/on_boarding_screen.dart';
 import 'modules/vitals/Height/cubit/cubit.dart';
 import 'modules/vitals/blood_glucose/cubit/cubit.dart';
+import 'modules/vitals/carbohydrates/cubit/cubit.dart';
 import 'modules/vitals/heart_rate/cubit/cubit.dart';
+import 'modules/vitals/insuline/cubit/cubit.dart';
 import 'modules/vitals/steps/cubit/cubit.dart';
 import 'modules/vitals/weight/cubit/cubit.dart';
 
@@ -92,6 +94,8 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => GlucoseCubit()),
         BlocProvider(create: (context) => WeightCubit()),
         BlocProvider(create: (context) => HeightCubit()),
+        BlocProvider(create: (context) => insulinCubit()),
+        BlocProvider(create: (context) => CarboCubit()),
       ],
       child: BlocConsumer<GPCubit, GPStates>(
         listener: (context, state) {},

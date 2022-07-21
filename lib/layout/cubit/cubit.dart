@@ -180,19 +180,18 @@ class GPCubit extends Cubit<GPStates> {
         await health.writeHealthData(_weight!, HealthDataType.WEIGHT, now, now);
     bool _success6 = await health.writeHealthData(
         (_height! * 0.01), HealthDataType.HEIGHT, now, now);
-    bool _success7 =   await health
-          .writeHealthData(_fat_insuline!, HealthDataType.BODY_FAT_PERCENTAGE, now, now);
+    bool _success7 = await health.writeHealthData(
+        _fat_insuline!, HealthDataType.BODY_FAT_PERCENTAGE, now, now);
     bool _success8 = await health.writeHealthData(
         _temperatur_carbohydrates!, HealthDataType.BODY_TEMPERATURE, now, now);
 
-   
-    if (_success1 &
-        _success2 &
-        _success3 &
-        _success4 &
-        _success5 &
-        _success6 &
-        _success7 &
+    if (_success1 &&
+        _success2 &&
+        _success3 &&
+        _success4 &&
+        _success5 &&
+        _success6 &&
+        _success7 &&
         _success8) {
       emit(DataAddedToGoogleFitSuccessState());
     } else {
@@ -319,6 +318,7 @@ class GPCubit extends Cubit<GPStates> {
         });
 
         // Fetch Heart rate from google fit and insert it in stepstable in the sql database
+
         List<HealthDataPoint> _hr = await ConstantFunctinsCubit()
             .fetchHeartRate(from: fetch_hr_from_date, to: now);
         _hr.forEach((element) async {
@@ -328,20 +328,22 @@ class GPCubit extends Cubit<GPStates> {
         });
         // Fetch Calories from google fit and insert it in stepstable in the sql database
         List<HealthDataPoint> _calories = await ConstantFunctinsCubit()
-            .fetchCalories(from: fetch_calories_from_date, to: now);
+            .fetchCalories(from: fetch_calories_from_date, to: DateTime.now());
         _calories.forEach((element) async {
-          print(element.dateFrom);
-          print(element.dateTo);
-          print(element.value.round());
-          int calories_response = await _sqlDb.insertData(
-              // "INSERT INTO `caloriestable` (`caloriesdate`,`caloriesvalue` ,`untillcaloriesdate`) VALUES ( '${int.parse(element.dateFrom.toString())}' , ${element.value} , ${element.dateTo} )");
-              ''' INSERT INTO `caloriestable` 
+          // print(element.dateFrom);
+          // print(element.dateTo);
+          // print(element.value.round());
+          if (element.value.round() > 1) {
+            int calories_response = await _sqlDb.insertData(
+                // "INSERT INTO `caloriestable` (`caloriesdate`,`caloriesvalue` ,`untillcaloriesdate`) VALUES ( '${int.parse(element.dateFrom.toString())}' , ${element.value} , ${element.dateTo} )");
+                ''' INSERT INTO `caloriestable` 
               (`caloriesdate`,`caloriesvalue`, `untillcaloriesdate`) 
               VALUES 
-              ( '${element.dateFrom}' ,'${element.value.round()}','${element.dateTo}')
+              ( '${element.dateTo}' ,'${element.value.round()}','${element.dateTo}')
               ''');
 
-          print('Insert calories value in index Number ${calories_response}');
+            print('Insert calories value in index Number ${calories_response}');
+          }
         });
 
         // Fetch Weight from google fit and insert it in weighttable in the sql database
@@ -374,8 +376,7 @@ class GPCubit extends Cubit<GPStates> {
 
         // Fetch fat_insuline from google fit and insert it in Glucosetable in the sql database
         List<HealthDataPoint> _insulineList = await ConstantFunctinsCubit()
-            .fetchFatInsuline(
-                from: fetch_fat_insuline, to: now);
+            .fetchFatInsuline(from: fetch_fat_insuline, to: now);
         _insulineList.forEach((element) async {
           print(element);
           int insuline_response = await _sqlDb.insertData(
@@ -384,6 +385,7 @@ class GPCubit extends Cubit<GPStates> {
         });
 
         // Fetch  Temperatur_carbohydrates from google fit and insert it in Glucosetable in the sql database
+
         List<HealthDataPoint> _carbohydratesList = await ConstantFunctinsCubit()
             .fetchTemperaturCarbohydrates(
                 from: fetch_temperatur_carbohydrates, to: now);
@@ -477,10 +479,4 @@ class GPCubit extends Cubit<GPStates> {
 
     emit(ModelCycleOFFState());
   }
-      
-
-
-  
-
-  
 }

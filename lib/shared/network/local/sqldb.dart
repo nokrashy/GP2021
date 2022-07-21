@@ -75,7 +75,7 @@ class SqlDb {
         `Glucosedate` DATETIME NOT NULL,
         `Glucosevalue` VARCHAR NOT NULL)
     ''');
-    
+
     // Insulin => BODY_FAT_PERCENTAGE
     batch.execute('''
       CREATE TABLE `Insulintable` (

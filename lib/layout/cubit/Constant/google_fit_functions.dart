@@ -183,8 +183,7 @@ class ConstantFunctinsCubit extends Cubit<ConstantFunctinsStates> {
   }
 
 // Fetch Insuline => BODY_FAT_PERCENTAGE
-  Future fetchFatInsuline(
-      {required final from, required final to}) async {
+  Future fetchFatInsuline({required final from, required final to}) async {
     emit(FatInsulineStartFetchedState());
     List<HealthDataPoint> fat_insulineDataList = [];
     bool requested = await health.requestAuthorization(
@@ -192,8 +191,8 @@ class ConstantFunctinsCubit extends Cubit<ConstantFunctinsStates> {
         permissions: [HealthDataAccess.READ]);
     if (requested) {
       try {
-        List<HealthDataPoint> healthData = await health
-            .getHealthDataFromTypes(from, to, [HealthDataType.BLOOD_OXYGEN]);
+        List<HealthDataPoint> healthData = await health.getHealthDataFromTypes(
+            from, to, [HealthDataType.BODY_FAT_PERCENTAGE]);
         fat_insulineDataList.addAll(healthData);
       } catch (error) {
         print("Exception in getHealthDataFromTypes: $error");

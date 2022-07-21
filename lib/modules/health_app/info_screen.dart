@@ -8,9 +8,10 @@ import 'package:fristapp/modules/vitals/steps/total_steps.dart';
 import 'package:fristapp/shared/component/component.dart';
 import 'package:fristapp/shared/styles/MyIcon.dart.dart';
 import 'package:fristapp/shared/styles/icon_broken.dart';
-
 import '../vitals/blood_glucose/blood_glucose.dart';
+import '../vitals/carbohydrates/carbo.dart';
 import '../vitals/height/height.dart';
+import '../vitals/insuline/insuline.dart';
 import '../vitals/weight/weight.dart';
 
 class Infoscreen extends StatelessWidget {
@@ -42,13 +43,36 @@ class Infoscreen extends StatelessWidget {
                         children: [
                           GestureDetector(
                             onTap: () {
-                              print('*************************');
                               NavigetTo(context, GlucoseRate());
                             },
                             child: InfoCard(
                               title: 'Blood Glucose',
                               content: 'mmol/L',
                               icon: IconBroken.User,
+                              isPrimaryColor: false,
+                              context: context,
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              NavigetTo(context, insulinRate());
+                            },
+                            child: InfoCard(
+                              title: 'Insulin',
+                              content: 'Units',
+                              icon: IconBroken.Discovery,
+                              isPrimaryColor: false,
+                              context: context,
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              NavigetTo(context, CarboRate());
+                            },
+                            child: InfoCard(
+                              title: 'Carbohydrates',
+                              content: 'Units',
+                              icon: IconBroken.Tick_Square,
                               isPrimaryColor: false,
                               context: context,
                             ),
@@ -89,13 +113,8 @@ class Infoscreen extends StatelessWidget {
                               context: context,
                             ),
                           ),
-
                           GestureDetector(
                             onTap: () {
-                              // print('*************************');
-                              print('Height');
-                              // print(cubit.lastDateHeight!.value);
-                              // print('*************************');
                               NavigetTo(context, Height());
                             },
                             child: InfoCard(
@@ -108,7 +127,6 @@ class Infoscreen extends StatelessWidget {
                           ),
                           GestureDetector(
                             onTap: () {
-                              
                               NavigetTo(context, Weight());
                             },
                             child: InfoCard(
@@ -119,34 +137,6 @@ class Infoscreen extends StatelessWidget {
                               context: context,
                             ),
                           ),
-                          // GestureDetector(
-                          //   onTap: () {
-                          //     // NavigetTo(context, BloodOxygen());
-                          //   },
-                          //   child: InfoCard(
-                          //     title: 'SpO2',
-                          //     content: 'Percentage',
-                          //     icon: MyIcon.pan_tool,
-                          //     isPrimaryColor: false,
-                          //     context: context,
-                          //   ),
-                          // ),
-                          // GestureDetector(
-                          //   onTap: () {
-                          //     print('*************************');
-                          //     print('Body Temperatur');
-                          //     print(cubit.lastDateBodyTemperatur!.value);
-                          //     print('*************************');
-
-                          //   },
-                          //   child: InfoCard(
-                          //     title: 'Body Temperature',
-                          //     content: '°C',
-                          //     icon: MyIcon.temperatire,
-                          //     isPrimaryColor: false,
-                          //     context: context,
-                          //   ),
-                          // ),
                         ],
                       ),
                     ]),

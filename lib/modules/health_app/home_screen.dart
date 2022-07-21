@@ -1,15 +1,9 @@
-import 'dart:convert';
-
-import 'package:conditional_builder/conditional_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fristapp/layout/cubit/cubit.dart';
 import 'package:fristapp/layout/cubit/states.dart';
-import 'package:fristapp/shared/component/component.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
-import 'package:intl/intl.dart';
 import 'package:percent_indicator/percent_indicator.dart';
-import 'package:workout/workout.dart';
 
 class HomeScreen extends StatelessWidget {
   @override

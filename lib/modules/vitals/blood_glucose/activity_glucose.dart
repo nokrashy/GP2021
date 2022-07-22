@@ -82,7 +82,7 @@ class ActivityGlucose extends StatelessWidget {
                                       '${double.parse(snapshot[index]['Glucosevalue']).round()}')),
                               leading: Text(
                                   '${snapshot[index]['Glucosedate'].toString().substring(10, 16)}'),
-                              trailing: Text('mmol/L'),
+                              trailing: Text('mg/dL'),
                             ),
                           ),
                         ],

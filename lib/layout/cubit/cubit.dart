@@ -483,10 +483,8 @@ class GPCubit extends Cubit<GPStates> {
 
   // ****************************** Home Screen ******************************
   SqlDb _sqlDb = SqlDb();
-  DateTime startofTheDay = DateTime(
-      DateTime.now().subtract(Duration(days: 1)).year,
-      DateTime.now().subtract(Duration(days: 1)).month,
-      DateTime.now().subtract(Duration(days: 1)).day);
+  DateTime startofTheDay =
+      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
   DateTime endofTheDay =
       DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)
           .add(Duration(hours: 23, minutes: 59));
@@ -494,6 +492,7 @@ class GPCubit extends Cubit<GPStates> {
   int max_Glucose = 0;
   int last_Glucose_value = 0;
   late DateTime last_Glucose_date = startofTheDay;
+  int avg_Glucose_value = 0;
 
   List<ChartSampleData> chartData = <ChartSampleData>[];
   List<Map> new_response = [];
@@ -510,19 +509,30 @@ class GPCubit extends Cubit<GPStates> {
       {required int min,
       required int max,
       required int last_value,
-      required DateTime last_date}) {
+      required DateTime last_date,
+      required int avg}) {
     min_Glucose = min;
     max_Glucose = max;
     last_Glucose_value = last_value;
     last_Glucose_date = last_date;
+    avg_Glucose_value = avg;
   }
 
   List<dynamic> getMinMaxGlucose() {
-    return [min_Glucose, max_Glucose, last_Glucose_value, last_Glucose_date];
+    return [
+      min_Glucose,
+      max_Glucose,
+      last_Glucose_value,
+      last_Glucose_date,
+      avg_Glucose_value
+    ];
   }
 
   Future<void> fetchtodayglucose() =>
       Future.delayed(Duration(microseconds: 100), () async {
+        chartData = <ChartSampleData>[];
+        new_response = [];
+
         List<Map> _response = await _sqlDb.readData(
             "SELECT * FROM 'Glucosetable' WHERE `Glucosedate` > '${startofTheDay}' AND `Glucosedate` < '${endofTheDay}'");
 
@@ -549,6 +559,9 @@ class GPCubit extends Cubit<GPStates> {
         int _max_Glucose = 0;
         int _min_Glucose = 1000;
         int _last_Glucose_value = 0;
+        int _sum_avg = 0;
+        int _sum_avg_count = 0;
+        int _avg = 0;
         DateTime _last_Glucose_date = startofTheDay;
 
         new_response.forEach((element) {
@@ -566,23 +579,59 @@ class GPCubit extends Cubit<GPStates> {
             _last_Glucose_value = current_value;
             _last_Glucose_date =
                 DateTime.parse('${element.keys.single.toString()}');
+            _sum_avg += current_value;
+            _sum_avg_count += 1;
           }
 
           _getChartData.add(ChartSampleData(
               DateTime.parse(element.keys.single.toString()),
               double.parse(element.values.single.toString())));
         });
+
+        if (_sum_avg_count > 0) {
+          _avg = _sum_avg ~/ _sum_avg_count;
+        }
         setMinMaxGlucose(
             min: _min_Glucose,
             max: _max_Glucose,
             last_value: _last_Glucose_value,
-            last_date: _last_Glucose_date);
-        print(getMinMaxGlucose());
+            last_date: _last_Glucose_date,
+            avg: _avg);
+        set_condition_color_txt();
         setChartData(_getChartData);
 
         emit(HomeScreenRefreshedState());
       });
 
-  // List<ChartData> _getChartData = [];
+  Color codition_color = Colors.black;
+  String codition_txt = 'Refresh';
+  Color get_codition_color() {
+    return codition_color;
+  }
 
+  String get_codition_text() {
+    return codition_txt;
+  }
+
+  void set_condition_color_txt() {
+    if (getMinMaxGlucose()[2] < 54 && getMinMaxGlucose()[2] > 0) {
+      codition_color = Color.fromARGB(255, 150, 0, 0);
+      codition_txt = "Very Low";
+    } else if (getMinMaxGlucose()[2] >= 54 && getMinMaxGlucose()[2] < 70) {
+      codition_color = Color.fromARGB(255, 250, 20, 20);
+      codition_txt = "Low";
+    } else if (getMinMaxGlucose()[2] >= 70 && getMinMaxGlucose()[2] <= 180) {
+      codition_color = Colors.green;
+      codition_txt = "Normal";
+    } else if (getMinMaxGlucose()[2] > 180 && getMinMaxGlucose()[2] <= 250) {
+      codition_color = Color.fromARGB(255, 234, 238, 0);
+      codition_txt = "High";
+    } else if (getMinMaxGlucose()[2] > 250) {
+      codition_color = Color.fromARGB(255, 250, 206, 10);
+      codition_txt = "Very High";
+    } else {
+      codition_color = Colors.black;
+      codition_txt = 'Refresh';
+    }
+  }
 }

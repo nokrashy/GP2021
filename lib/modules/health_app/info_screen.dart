@@ -47,7 +47,7 @@ class Infoscreen extends StatelessWidget {
                             },
                             child: InfoCard(
                               title: 'Blood Glucose',
-                              content: 'mmol/L',
+                              content: 'mg/dL',
                               icon: IconBroken.User,
                               isPrimaryColor: false,
                               context: context,

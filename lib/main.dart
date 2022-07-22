@@ -85,6 +85,7 @@ class MyApp extends StatelessWidget {
               ..ChangeAppMode(fromShared: isDark)
               ..ChangeisOn(fromShared: isOn)
               ..getUserData()
+              ..fetchtodayglucose()
             // ..fetchData()
             // ..fetchStepData()
             ),

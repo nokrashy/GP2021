@@ -39,7 +39,6 @@ class DataAddedToGoogleFitSuccessState extends GPStates {}
 
 class DataAddedToGoogleFitErrorState extends GPStates {}
 
-
 class RefreshAndFetchDataState extends GPStates {}
 
 // -----------------------------------------------------------------------------------------------------------
@@ -67,3 +66,5 @@ class ModelCycleState extends GPStates {}
 
 class ModelCycleOFFState extends GPStates {}
 
+// Home Screen
+class HomeScreenRefreshedState extends GPStates {}

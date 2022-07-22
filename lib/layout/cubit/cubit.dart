@@ -20,6 +20,7 @@ import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'dart:math';
 
+import '../../model/chart_data_model.dart';
 import 'Constant/google_fit_functions.dart';
 
 class GPCubit extends Cubit<GPStates> {
@@ -28,7 +29,7 @@ class GPCubit extends Cubit<GPStates> {
 
   // ******************************      Main App Construction      ******************************
   int currentIndex = 0;
-  List<String> appBartitle = ['Diabetes Mellitus', 'Vitals', 'Settings'];
+  List<String> appBartitle = ['Glucose tracking', 'Vitals', 'Settings'];
   List<BottomNavigationBarItem> bottomItems = [
     BottomNavigationBarItem(
         icon: Icon(
@@ -479,4 +480,109 @@ class GPCubit extends Cubit<GPStates> {
 
     emit(ModelCycleOFFState());
   }
+
+  // ****************************** Home Screen ******************************
+  SqlDb _sqlDb = SqlDb();
+  DateTime startofTheDay = DateTime(
+      DateTime.now().subtract(Duration(days: 1)).year,
+      DateTime.now().subtract(Duration(days: 1)).month,
+      DateTime.now().subtract(Duration(days: 1)).day);
+  DateTime endofTheDay =
+      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)
+          .add(Duration(hours: 23, minutes: 59));
+  int min_Glucose = 1000;
+  int max_Glucose = 0;
+  int last_Glucose_value = 0;
+  late DateTime last_Glucose_date = startofTheDay;
+
+  List<ChartSampleData> chartData = <ChartSampleData>[];
+  List<Map> new_response = [];
+
+  List<ChartSampleData> getChartData() {
+    return chartData;
+  }
+
+  void setChartData(List<ChartSampleData> x) {
+    chartData = x;
+  }
+
+  void setMinMaxGlucose(
+      {required int min,
+      required int max,
+      required int last_value,
+      required DateTime last_date}) {
+    min_Glucose = min;
+    max_Glucose = max;
+    last_Glucose_value = last_value;
+    last_Glucose_date = last_date;
+  }
+
+  List<dynamic> getMinMaxGlucose() {
+    return [min_Glucose, max_Glucose, last_Glucose_value, last_Glucose_date];
+  }
+
+  Future<void> fetchtodayglucose() =>
+      Future.delayed(Duration(microseconds: 100), () async {
+        List<Map> _response = await _sqlDb.readData(
+            "SELECT * FROM 'Glucosetable' WHERE `Glucosedate` > '${startofTheDay}' AND `Glucosedate` < '${endofTheDay}'");
+
+        for (int i = 0; i < 96; i++) {
+          print(startofTheDay.add(new Duration(minutes: 15)));
+          List<Map> _newresponse = await _sqlDb.readData(
+              "SELECT `Glucosevalue` FROM 'Glucosetable' WHERE `Glucosedate` > '${startofTheDay.add(new Duration(minutes: (i * 15)))}' AND `Glucosedate` < '${startofTheDay.add(new Duration(hours: ((i * 15) + 15)))}'");
+          double sum = 0;
+          _newresponse.forEach((element) {
+            sum += double.parse(element['Glucosevalue']);
+          });
+          if ((sum / _newresponse.length).isNaN) {
+            new_response.add(
+                {'${startofTheDay.add(new Duration(minutes: (i * 15)))}': 0});
+          } else {
+            new_response.add({
+              '${startofTheDay.add(new Duration(minutes: (i * 15)))}':
+                  (sum ~/ _newresponse.length).toInt()
+            });
+          }
+        }
+        List<ChartSampleData> _getChartData = [];
+        int current_value = 0;
+        int _max_Glucose = 0;
+        int _min_Glucose = 1000;
+        int _last_Glucose_value = 0;
+        DateTime _last_Glucose_date = startofTheDay;
+
+        new_response.forEach((element) {
+          print(
+              '${element.keys.single.toString()} : ${element.values.single.toString()}');
+          current_value =
+              double.parse('${element.values.single.toString()}').round();
+          if (current_value != 0) {
+            if (current_value > _max_Glucose) {
+              _max_Glucose = current_value;
+            }
+            if (current_value < _min_Glucose) {
+              _min_Glucose = current_value;
+            }
+            _last_Glucose_value = current_value;
+            _last_Glucose_date =
+                DateTime.parse('${element.keys.single.toString()}');
+          }
+
+          _getChartData.add(ChartSampleData(
+              DateTime.parse(element.keys.single.toString()),
+              double.parse(element.values.single.toString())));
+        });
+        setMinMaxGlucose(
+            min: _min_Glucose,
+            max: _max_Glucose,
+            last_value: _last_Glucose_value,
+            last_date: _last_Glucose_date);
+        print(getMinMaxGlucose());
+        setChartData(_getChartData);
+
+        emit(HomeScreenRefreshedState());
+      });
+
+  // List<ChartData> _getChartData = [];
+
 }

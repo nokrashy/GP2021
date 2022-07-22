@@ -1,9 +1,12 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fristapp/layout/cubit/states.dart';
 import 'package:fristapp/model/user_model.dart';
@@ -21,6 +24,8 @@ import 'package:http/http.dart' as http;
 import 'dart:math';
 
 import '../../model/chart_data_model.dart';
+import '../../modules/Firebase/firebase.dart';
+import '../../modules/vitals/blood_glucose/cubit/cubit.dart';
 import 'Constant/google_fit_functions.dart';
 
 class GPCubit extends Cubit<GPStates> {
@@ -84,7 +89,9 @@ class GPCubit extends Cubit<GPStates> {
 
   void UserDeleteAccount() {
     emit(UserDeleteAccountLoadingState());
-    FirebaseAuth.instance.currentUser!.delete().then((value) {
+    FirebaseAuth.instance.currentUser!.delete().then((value) async {
+      SqlDb _sqlDb = SqlDb();
+      await _sqlDb.mydeleteDatabase();
       print('Deleted Successfully');
       emit(UserDeleteAccountSuccessState());
     }).catchError((error) {
@@ -99,6 +106,32 @@ class GPCubit extends Cubit<GPStates> {
 
 // Request Connect to google fit
   bool AuthorizationRequested = false;
+  bool isConnected = false;
+  void getisConnected({bool? fromShared}) {
+    if (fromShared != null) {
+      isConnected = true;
+      emit(IsConnectedSTrueState());
+    } else
+      isConnected = false;
+    CachHelper.saveData(key: 'isConnected', value: isConnected).then((value) {
+      emit(IsConnectedFalseState());
+    });
+    // if (isConnected == true) {
+    //   modelCycleOn();
+    // } else {
+    //   modelCycleOff();
+    // }
+  }
+
+  //
+
+  Future revoke() async {
+    await HealthFactory.revokePermissions().then((value) {
+      print('Revoked Successfully');
+    }).catchError((onError) {
+      print('Error: ${onError}');
+    });
+  }
 
   Future Request_Connect() async {
     emit(StartConnecttoFitState());
@@ -141,7 +174,10 @@ class GPCubit extends Cubit<GPStates> {
           await health.requestAuthorization(types, permissions: permissions);
     }
     if (AuthorizationRequested) {
-      emit(ConnecttoFitSuccessState());
+      isConnected = true;
+      CachHelper.saveData(key: 'isConnected', value: isConnected).then((value) {
+        emit(ConnecttoFitSuccessState());
+      });
     } else {
       emit(ConnecttoFitFailedsState());
     }
@@ -201,8 +237,6 @@ class GPCubit extends Cubit<GPStates> {
   }
 
   // ------------------------------------------------------
-
-  final now = DateTime.now();
   final lastmonth = DateTime.now().subtract(Duration(days: 10));
 
   Future<void> refreshandfetch() =>
@@ -308,99 +342,123 @@ class GPCubit extends Cubit<GPStates> {
               .add(Duration(seconds: 2));
         }
 
-        // Fetch Steps from google fit and insert it in stepstable in the sql database
-        List<HealthDataPoint> _steps = await ConstantFunctinsCubit()
-            .fetchSteps(from: fetch_steps_from_date, to: now);
+        if (isConnected) {
+          // Fetch Steps from google fit and insert it in stepstable in the sql database
+          List<HealthDataPoint> _steps = await ConstantFunctinsCubit()
+              .fetchSteps(from: fetch_steps_from_date, to: DateTime.now());
 
-        _steps.forEach((element) async {
-          int steps_response = await _sqlDb.insertData(
-              "INSERT INTO `stepstable` ( `stepsdate`, `stepsvalue`) VALUES ( '${element.dateTo}' , ${element.value} )");
-          print('Insert Step value in index Number ${steps_response}');
-        });
+          _steps.forEach((element) async {
+            int steps_response = await _sqlDb.insertData(
+                "INSERT INTO `stepstable` ( `stepsdate`, `stepsvalue`) VALUES ( '${element.dateTo}' , ${element.value} )");
+            print('Insert Step value in index Number ${steps_response}');
+          });
 
-        // Fetch Heart rate from google fit and insert it in stepstable in the sql database
+          // Fetch Heart rate from google fit and insert it in stepstable in the sql database
 
-        List<HealthDataPoint> _hr = await ConstantFunctinsCubit()
-            .fetchHeartRate(from: fetch_hr_from_date, to: now);
-        _hr.forEach((element) async {
-          int hr_response = await _sqlDb.insertData(
-              "INSERT INTO `hrtable` ( `hrdate`, `hrvalue` ) VALUES ( '${element.dateTo}' , ${element.value})");
-          print('Insert Hr value in index Number ${hr_response}');
-        });
-        // Fetch Calories from google fit and insert it in stepstable in the sql database
-        List<HealthDataPoint> _calories = await ConstantFunctinsCubit()
-            .fetchCalories(from: fetch_calories_from_date, to: DateTime.now());
-        _calories.forEach((element) async {
-          // print(element.dateFrom);
-          // print(element.dateTo);
-          // print(element.value.round());
-          if (element.value.round() > 1) {
-            int calories_response = await _sqlDb.insertData(
-                // "INSERT INTO `caloriestable` (`caloriesdate`,`caloriesvalue` ,`untillcaloriesdate`) VALUES ( '${int.parse(element.dateFrom.toString())}' , ${element.value} , ${element.dateTo} )");
-                ''' INSERT INTO `caloriestable` 
+          List<HealthDataPoint> _hr = await ConstantFunctinsCubit()
+              .fetchHeartRate(from: fetch_hr_from_date, to: DateTime.now());
+          _hr.forEach((element) async {
+            int hr_response = await _sqlDb.insertData(
+                "INSERT INTO `hrtable` ( `hrdate`, `hrvalue` ) VALUES ( '${element.dateTo}' , ${element.value})");
+            print('Insert Hr value in index Number ${hr_response}');
+          });
+          // Fetch Calories from google fit and insert it in stepstable in the sql database
+          List<HealthDataPoint> _calories = await ConstantFunctinsCubit()
+              .fetchCalories(
+                  from: fetch_calories_from_date, to: DateTime.now());
+          _calories.forEach((element) async {
+            // print(element.dateFrom);
+            // print(element.dateTo);
+            // print(element.value.round());
+            if (element.value.round() > 1) {
+              int calories_response = await _sqlDb.insertData(
+                  // "INSERT INTO `caloriestable` (`caloriesdate`,`caloriesvalue` ,`untillcaloriesdate`) VALUES ( '${int.parse(element.dateFrom.toString())}' , ${element.value} , ${element.dateTo} )");
+                  ''' INSERT INTO `caloriestable` 
               (`caloriesdate`,`caloriesvalue`, `untillcaloriesdate`) 
               VALUES 
               ( '${element.dateTo}' ,'${element.value.round()}','${element.dateTo}')
               ''');
 
-            print('Insert calories value in index Number ${calories_response}');
-          }
-        });
+              print(
+                  'Insert calories value in index Number ${calories_response}');
+            }
+          });
 
-        // Fetch Weight from google fit and insert it in weighttable in the sql database
-        List<HealthDataPoint> _weightList = await ConstantFunctinsCubit()
-            .fetchWeight(from: fetch_weight_from_date, to: now);
-        _weightList.forEach((element) async {
-          int weight_response = await _sqlDb.insertData(
-              "INSERT INTO `weighttable` ( `weightsdate`, `weightvalue` ) VALUES ( '${element.dateTo}' , ${element.value})");
-          print('Insert Weight value in index Number ${weight_response}');
-        });
+          // Fetch Weight from google fit and insert it in weighttable in the sql database
+          List<HealthDataPoint> _weightList = await ConstantFunctinsCubit()
+              .fetchWeight(from: fetch_weight_from_date, to: DateTime.now());
+          _weightList.forEach((element) async {
+            int weight_response = await _sqlDb.insertData(
+                "INSERT INTO `weighttable` ( `weightsdate`, `weightvalue` ) VALUES ( '${element.dateTo}' , ${element.value})");
+            print('Insert Weight value in index Number ${weight_response}');
+          });
 
-        // Fetch Height from google fit and insert it in heighttable in the sql database
-        List<HealthDataPoint> _heightList = await ConstantFunctinsCubit()
-            .fetchHeight(from: fetch_height_from_date, to: now);
-        _heightList.forEach((element) async {
-          int height_response = await _sqlDb.insertData(
-              "INSERT INTO `heighttable` ( `heightdate`, `heightvalue` ) VALUES ( '${element.dateTo}' , ${element.value})");
-          print('Insert Height value in index Number ${height_response}');
-        });
+          // Fetch Height from google fit and insert it in heighttable in the sql database
+          List<HealthDataPoint> _heightList = await ConstantFunctinsCubit()
+              .fetchHeight(from: fetch_height_from_date, to: DateTime.now());
+          _heightList.forEach((element) async {
+            int height_response = await _sqlDb.insertData(
+                "INSERT INTO `heighttable` ( `heightdate`, `heightvalue` ) VALUES ( '${element.dateTo}' , ${element.value})");
+            print('Insert Height value in index Number ${height_response}');
+          });
 
-        // Fetch Glucose from google fit and insert it in Glucosetable in the sql database
-        List<HealthDataPoint> _glucoseList = await ConstantFunctinsCubit()
-            .fetchBloodGlucose(from: fetch_glucose_from_date, to: now);
-        _glucoseList.forEach((element) async {
-          print(element);
-          int glucose_response = await _sqlDb.insertData(
-              "INSERT INTO `Glucosetable` ( `Glucosedate`, `Glucosevalue` ) VALUES ( '${element.dateTo}' , ${element.value})");
-          print('Insert Glucose value in index Number ${glucose_response}');
-        });
+          // Fetch Glucose from google fit and insert it in Glucosetable in the sql database
+          List<HealthDataPoint> _glucoseList = await ConstantFunctinsCubit()
+              .fetchBloodGlucose(
+                  from: fetch_glucose_from_date, to: DateTime.now());
 
-        // Fetch fat_insuline from google fit and insert it in Glucosetable in the sql database
-        List<HealthDataPoint> _insulineList = await ConstantFunctinsCubit()
-            .fetchFatInsuline(from: fetch_fat_insuline, to: now);
-        _insulineList.forEach((element) async {
-          print(element);
-          int insuline_response = await _sqlDb.insertData(
-              "INSERT INTO `Insulintable` ( `Insulindate`, `Insulinvalue` ) VALUES ( '${element.dateTo}' , ${element.value})");
-          print('Insert Insuline value in index Number ${insuline_response}');
-        });
+          _glucoseList.forEach((element) async {
+            print(element);
 
-        // Fetch  Temperatur_carbohydrates from google fit and insert it in Glucosetable in the sql database
+            int glucose_response = await _sqlDb.insertData(
+                "INSERT INTO `Glucosetable` ( `Glucosedate`, `Glucosevalue` ) VALUES ( '${element.dateTo}' , ${element.value})");
+            print('Insert Glucose value in index Number ${glucose_response}');
+          });
 
-        List<HealthDataPoint> _carbohydratesList = await ConstantFunctinsCubit()
-            .fetchTemperaturCarbohydrates(
-                from: fetch_temperatur_carbohydrates, to: now);
-        _carbohydratesList.forEach((element) async {
-          print(element);
-          int carbohydrates_response = await _sqlDb.insertData(
-              "INSERT INTO `Carbohydratestable` ( `Carbohydratesdate`, `Carbohydratesvalue` ) VALUES ( '${element.dateTo}' , ${element.value})");
-          print(
-              'Insert Carbohydrates value in index Number ${carbohydrates_response}');
-        });
+          // Fetch fat_insuline from google fit and insert it in Glucosetable in the sql database
+          List<HealthDataPoint> _insulineList = await ConstantFunctinsCubit()
+              .fetchFatInsuline(from: fetch_fat_insuline, to: DateTime.now());
+          _insulineList.forEach((element) async {
+            print(element);
+            int insuline_response = await _sqlDb.insertData(
+                "INSERT INTO `Insulintable` ( `Insulindate`, `Insulinvalue` ) VALUES ( '${element.dateTo}' , ${element.value})");
+            print('Insert Insuline value in index Number ${insuline_response}');
+          });
 
-        emit(RefreshAndFetchDataState());
+          // Fetch  Temperatur_carbohydrates from google fit and insert it in Glucosetable in the sql database
+
+          List<HealthDataPoint> _carbohydratesList =
+              await ConstantFunctinsCubit().fetchTemperaturCarbohydrates(
+                  from: fetch_temperatur_carbohydrates, to: DateTime.now());
+          _carbohydratesList.forEach((element) async {
+            print(element);
+            int carbohydrates_response = await _sqlDb.insertData(
+                "INSERT INTO `Carbohydratestable` ( `Carbohydratesdate`, `Carbohydratesvalue` ) VALUES ( '${element.dateTo}' , ${element.value})");
+            print(
+                'Insert Carbohydrates value in index Number ${carbohydrates_response}');
+          });
+          emit(RefreshAndFetchDataState());
+        }
       });
 // -----------------------------------------------------------------------------------------------------------
+// ***********************************Settings Screen *************************
+  Future<AuthStatus> resetPassword({required String email,required BuildContext context}) async {
+    emit(ResetLoadingState());
+    late AuthStatus _status;
+    await FirebaseAuth.instance
+        .sendPasswordResetEmail(email: email)
+        .then((value) {
+      _status = AuthStatus.successful;
+      Navigator.pop(context);
+      emit(ResetSuccessState());
+    }).catchError((e) {
+      _status = AuthExceptionHandler.handleAuthException(e);
+      emit(ResetErrorState());
+    });
+    return _status;
+  }
+  // ********************************************************************
+
 // Handle Phone Number
   bool isupdated = false;
   late String doc_num;
@@ -429,19 +487,49 @@ class GPCubit extends Cubit<GPStates> {
     }
   }
 
-  // Handle Model
-
-  fetchModel(String url) async {
+  //***************************************/ Handle Model ****************************
+  //
+  Future<String> predictPrice(
+      {required String url,
+      required double calories,
+      required double hr,
+      required double steps,
+      required double glucose,
+      required double insuline,
+      required double carbo}) async {
+    var body = [
+      {
+        "Calories": calories,
+        "Average heart rate ": hr,
+        "Step count": steps,
+        "Historic Glucose": glucose,
+        "Rapid-Acting Insulin": insuline,
+        "Carbohydrates": carbo,
+      }
+    ];
+    var client = new http.Client();
+    var uri = Uri.parse(url);
+    Map<String, String> headers = {"Content-type": "application/json"};
+    String jsonString = json.encode(body);
     try {
       emit(MOdelLoadingState());
-      http.Response response = await http.get(Uri.parse(url));
-      emit(MOdelrSuccessState());
-      return response.body;
+      var resp = await client.post(uri, headers: headers, body: jsonString);
+      if (resp.statusCode == 200) {
+        print("DATA FETCHED SUCCESSFULLY");
+        var result = json.decode(resp.body);
+        print(result["prediction"]);
+        emit(MOdelrSuccessState());
+        return result["prediction"];
+      }
     } catch (e) {
-      print('Error: ${e}');
+      print("EXCEPTION OCCURRED: $e");
       emit(MOdelErrorState());
+      return 'f';
     }
+    return 'fff';
   }
+
+  ////************************************** */ Background Cycle ****************************
 
   bool isOn = false;
   int alarmId = 1;
@@ -462,13 +550,37 @@ class GPCubit extends Cubit<GPStates> {
 
   Timer? timer;
   void modelCycleOn() {
-    const oneSec = Duration(minutes: 5);
+    const oneSec = Duration(minutes: 15);
     timer = Timer.periodic(oneSec, (Timer t) {
-      print("**********************");
-      print(DateTime.now());
-      showToast(msg: "Data Added", state: toastStates.SUCCESS);
-      addData();
-      emit(ModelCycleState());
+      refreshandfetch().then((value) {
+        getLast15().then((value) {
+          predictPrice(
+            url: 'https://tessssssst.azurewebsites.net//Mypredict',
+            calories: calories_sum,
+            hr: hr_avg,
+            steps: steps_sum,
+            glucose: glucose_avg,
+            insuline: insuline_sum,
+            carbo: carbo_sum,
+          ).then((value) {
+            print('Result : ${value}');
+            addglucoseToGooglefit(
+              glucose: double.parse(value),
+              date: DateTime.now(),
+            );
+            refreshandfetch();
+            emit(ModelCycleSuccessState(value));
+          }).catchError((onError) {
+            print('Error: ${onError}');
+            emit(ModelCycleErrorState());
+          });
+        }).catchError((onError) {
+          print('Error: ${onError}');
+          emit(GetLast15ErrorState());
+        });
+      });
+
+      // addData();
     });
   }
 
@@ -479,6 +591,110 @@ class GPCubit extends Cubit<GPStates> {
     }
 
     emit(ModelCycleOFFState());
+  }
+
+  // ****Functions related to model cycle****
+  double hr_avg = 0;
+  double glucose_avg = 0;
+  double calories_sum = 0;
+  double steps_sum = 0;
+  double insuline_sum = 0;
+  double carbo_sum = 0;
+  void setlast15({
+    required double hr_avgg,
+    required double glucose_avgg,
+    required double calories_sumg,
+    required double steps_sumg,
+    required double insuline_sumg,
+    required double carbo_sumg,
+  }) {
+    hr_avg = hr_avgg;
+    glucose_avg = glucose_avgg;
+    calories_sum = calories_sumg;
+    steps_sum = steps_sumg;
+    insuline_sum = insuline_sumg;
+    carbo_sum = carbo_sumg;
+  }
+
+  Future<void> getLast15() async {
+    DateTime befor_fifteen_minutes =
+        DateTime.now().subtract(Duration(minutes: 15));
+    DateTime Noww = DateTime.now();
+    double _hr_avg = 0;
+    double _glucose_avg = 0;
+    double _calories_sum = 0;
+    double _hr_sum = 0;
+    double _steps_sum = 0;
+    double _glucose_sum = 0;
+    double _insuline_sum = 0;
+    double _carbo_sum = 0;
+    setlast15(
+      calories_sumg: _calories_sum,
+      carbo_sumg: _carbo_sum,
+      glucose_avgg: _glucose_avg,
+      hr_avgg: _hr_avg,
+      insuline_sumg: _insuline_sum,
+      steps_sumg: _steps_sum,
+    );
+    List<Map> _calories_response = await _sqlDb.readData(
+        "SELECT `caloriesvalue` FROM 'caloriestable' WHERE `caloriesdate` > '${befor_fifteen_minutes}' AND `caloriesdate` < '${Noww}'");
+    _calories_response.forEach((element) {
+      _calories_sum += double.parse(element['caloriesvalue']);
+    });
+
+    List<Map> _hr_response = await _sqlDb.readData(
+        "SELECT `hrvalue` FROM 'hrtable' WHERE `hrdate` > '${befor_fifteen_minutes}' AND `hrdate` < '${Noww}'");
+    _hr_response.forEach((element) {
+      _hr_sum += double.parse(element['hrvalue']);
+    });
+    sleep(new Duration(milliseconds: 10));
+    List<Map> _steps_response = await _sqlDb.readData(
+        "SELECT `stepsvalue` FROM 'stepstable' WHERE `stepsdate` > '${befor_fifteen_minutes}' AND `stepsdate` < '${Noww}'");
+    _steps_response.forEach((element) {
+      _steps_sum += double.parse(element['stepsvalue']);
+    });
+
+    List<Map> _glucose_response = await _sqlDb.readData(
+        "SELECT `Glucosevalue` FROM 'Glucosetable' WHERE `Glucosedate` > '${befor_fifteen_minutes}' AND `Glucosedate` < '${Noww}'");
+    _glucose_response.forEach((element) {
+      _glucose_sum += double.parse(element['Glucosevalue']);
+    });
+    sleep(new Duration(milliseconds: 10));
+    List<Map> _insuline_response = await _sqlDb.readData(
+        "SELECT  `Insulinvalue` FROM 'Insulintable' WHERE `Insulindate` > '${befor_fifteen_minutes}' AND `Insulindate` < '${Noww}'");
+    _insuline_response.forEach((element) {
+      _insuline_sum += double.parse(element['Insulinvalue']);
+    });
+    List<Map> _carbo_response = await _sqlDb.readData(
+        "SELECT `Carbohydratesvalue` FROM 'Carbohydratestable' WHERE `Carbohydratesdate` > '${befor_fifteen_minutes}' AND `Carbohydratesdate` < '${Noww}'");
+    _carbo_response.forEach((element) {
+      _carbo_sum += double.parse(element['Carbohydratesvalue']);
+    });
+    if (_hr_sum != 0) {
+      _hr_avg = _hr_sum / _hr_response.length;
+    }
+    if (_glucose_sum != 0) {
+      _glucose_avg = _glucose_sum / _glucose_response.length;
+    }
+    setlast15(
+      calories_sumg: calories_sum,
+      carbo_sumg: _carbo_sum,
+      glucose_avgg: _glucose_avg,
+      hr_avgg: _hr_avg,
+      insuline_sumg: _insuline_sum,
+      steps_sumg: _steps_sum,
+    );
+  }
+
+  addglucoseToGooglefit({glucose, date}) async {
+    emit(GlucoseStartAddToGoogleFitSuccessState());
+    bool _success = await health.writeHealthData(
+        glucose!, HealthDataType.BLOOD_GLUCOSE, date, date);
+    if (_success) {
+      emit(GlucoseAddedToGoogleFitSuccessState());
+    } else {
+      emit(GlucoseAddedToGoogleFitErrorState());
+    }
   }
 
   // ****************************** Home Screen ******************************
@@ -530,14 +746,10 @@ class GPCubit extends Cubit<GPStates> {
 
   Future<void> fetchtodayglucose() =>
       Future.delayed(Duration(microseconds: 100), () async {
+        refreshandfetch();
         chartData = <ChartSampleData>[];
         new_response = [];
-
-        List<Map> _response = await _sqlDb.readData(
-            "SELECT * FROM 'Glucosetable' WHERE `Glucosedate` > '${startofTheDay}' AND `Glucosedate` < '${endofTheDay}'");
-
         for (int i = 0; i < 96; i++) {
-          print(startofTheDay.add(new Duration(minutes: 15)));
           List<Map> _newresponse = await _sqlDb.readData(
               "SELECT `Glucosevalue` FROM 'Glucosetable' WHERE `Glucosedate` > '${startofTheDay.add(new Duration(minutes: (i * 15)))}' AND `Glucosedate` < '${startofTheDay.add(new Duration(hours: ((i * 15) + 15)))}'");
           double sum = 0;
@@ -563,10 +775,7 @@ class GPCubit extends Cubit<GPStates> {
         int _sum_avg_count = 0;
         int _avg = 0;
         DateTime _last_Glucose_date = startofTheDay;
-
         new_response.forEach((element) {
-          print(
-              '${element.keys.single.toString()} : ${element.values.single.toString()}');
           current_value =
               double.parse('${element.values.single.toString()}').round();
           if (current_value != 0) {
@@ -613,10 +822,11 @@ class GPCubit extends Cubit<GPStates> {
     return codition_txt;
   }
 
-  void set_condition_color_txt() {
+  Future<void> set_condition_color_txt() async {
     if (getMinMaxGlucose()[2] < 54 && getMinMaxGlucose()[2] > 0) {
       codition_color = Color.fromARGB(255, 150, 0, 0);
       codition_txt = "Very Low";
+      await FlutterPhoneDirectCaller.callNumber('${doc_num}');
     } else if (getMinMaxGlucose()[2] >= 54 && getMinMaxGlucose()[2] < 70) {
       codition_color = Color.fromARGB(255, 250, 20, 20);
       codition_txt = "Low";

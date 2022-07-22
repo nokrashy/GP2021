@@ -1,11 +1,7 @@
-import 'dart:math';
-
-import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fristapp/modules/vitals/weight/cubit/states.dart';
 import 'package:health/health.dart';
-
 import '../../../../shared/network/local/sqldb.dart';
 
 class WeightCubit extends Cubit<WeightStates> {
@@ -77,13 +73,14 @@ class WeightCubit extends Cubit<WeightStates> {
   DateTime getSelectedate() {
     return selectedate;
   }
- HealthFactory health = HealthFactory();
-  addWeightToGooglefit({weight,date})async{
-    bool _success =
-        await health.writeHealthData(weight!, HealthDataType.WEIGHT, date, date);
-    if(_success){
+
+  HealthFactory health = HealthFactory();
+  addWeightToGooglefit({weight, date}) async {
+    bool _success = await health.writeHealthData(
+        weight!, HealthDataType.WEIGHT, date, date);
+    if (_success) {
       emit(WeightAddedToGoogleFitSuccessState());
-    }else {
+    } else {
       emit(WeighAddedToGoogleFitErrorState());
     }
   }

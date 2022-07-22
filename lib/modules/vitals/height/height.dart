@@ -159,12 +159,6 @@ class Height extends StatelessWidget {
             ),
           ),
           appBar: AppBar(
-            leading: IconButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              icon: Icon(IconBroken.Arrow___Left_2),
-            ),
             title: Text(
               'Height',
               style: TextStyle(

@@ -1,29 +1,29 @@
 import 'package:conditional_builder/conditional_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fristapp/modules/vitals/insuline/cubit/cubit.dart';
-import 'package:fristapp/modules/vitals/insuline/cubit/states.dart';
+import 'package:fristapp/modules/vitals/blood_glucose/cubit/cubit.dart';
+import 'package:fristapp/modules/vitals/blood_glucose/cubit/states.dart';
 import 'package:intl/intl.dart';
 import '../../../layout/cubit/cubit.dart';
 import '../../../shared/component/component.dart';
 import '../../../shared/styles/MyIcon.dart.dart';
 
-class AddNewValueinsulin extends StatelessWidget {
+class AddNewValueglucose extends StatelessWidget {
   var formKey = GlobalKey<FormState>();
   var titleController = TextEditingController();
   var timeController = TextEditingController();
   var dateController = TextEditingController();
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<insulinCubit, insulinStates>(
+    return BlocConsumer<GlucoseCubit, GlucoseStates>(
       listener: (context, state) {},
       builder: (context, state) {
-        var cubit = insulinCubit.get(context);
+        var cubit = GlucoseCubit.get(context);
         return Scaffold(
           appBar: AppBar(
             actions: [],
             title: Text(
-              "Insulin",
+              "Glucose",
               style: TextStyle(
                 fontWeight: FontWeight.normal,
                 fontSize: 18.0,
@@ -46,11 +46,11 @@ class AddNewValueinsulin extends StatelessWidget {
                     type: TextInputType.number,
                     validate: (value) {
                       if (value!.isEmpty) {
-                        return 'please enter Insulin value';
+                        return 'please enter glucose value';
                       }
                       if (double.parse(value) > 1000 ||
                           double.parse(value) < 1) {
-                        return 'please enter a valid Insulin value';
+                        return 'please enter a valid glucose value';
                       }
                     },
                     prefix: MyIcon.weight,
@@ -107,7 +107,7 @@ class AddNewValueinsulin extends StatelessWidget {
                     height: 15.0,
                   ),
                   ConditionalBuilder(
-                    condition: State is! insulinStartAddToGoogleFitSuccessState,
+                    condition: State is! glucoseStartAddToGoogleFitSuccessState,
                     builder: (context) => defulteButton(
                       function: () {
                         if (formKey.currentState!.validate()) {
@@ -125,8 +125,8 @@ class AddNewValueinsulin extends StatelessWidget {
                                   .parse(datetimeString);
 
                           //
-                          cubit.addinsulinToGooglefit(
-                            insulin: double.parse(titleController.text),
+                          cubit.addglucoseToGooglefit(
+                            glucose: double.parse(titleController.text),
                             date: timeDate,
                           );
                           GPCubit().refreshandfetch();
@@ -149,4 +149,5 @@ class AddNewValueinsulin extends StatelessWidget {
       },
     );
   }
+
 }

@@ -45,6 +45,7 @@ void main() async {
   uId = await CachHelper.getData(key: 'uId');
   bool isDark = await CachHelper.getData(key: 'isDark');
   bool isOn = await CachHelper.getData(key: 'isOn');
+  bool isConnected = await CachHelper.getData(key: 'isConnected');
 //
   // await Permission.activityRecognition.request();
 
@@ -62,7 +63,7 @@ void main() async {
     print(value);
   }));
 
-  runApp(MyApp(isDark, widget, isOn));
+  runApp(MyApp(isDark, widget, isOn, isConnected));
 
   // ALarm
   // final int helloAlarmID = 0;
@@ -74,7 +75,8 @@ class MyApp extends StatelessWidget {
   final Widget statrWidget;
   final bool isDark;
   final bool isOn;
-  MyApp(this.isDark, this.statrWidget, this.isOn);
+  final bool isConnected;
+  MyApp(this.isDark, this.statrWidget, this.isOn, this.isConnected);
 
   @override
   Widget build(BuildContext context) {
@@ -84,6 +86,7 @@ class MyApp extends StatelessWidget {
             create: (context) => GPCubit()
               ..ChangeAppMode(fromShared: isDark)
               ..ChangeisOn(fromShared: isOn)
+              ..getisConnected(fromShared: isConnected)
               ..getUserData()
               ..fetchtodayglucose()
             // ..fetchData()

@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fristapp/modules/vitals/weight/cubit/cubit.dart';
 import 'package:fristapp/modules/vitals/weight/cubit/states.dart';
 import 'package:fristapp/shared/component/component.dart';
-import 'package:fristapp/shared/styles/icon_broken.dart';
 import 'package:intl/intl.dart';
 
 import '../../../layout/cubit/cubit.dart';
@@ -160,12 +159,6 @@ class Weight extends StatelessWidget {
             ),
           ),
           appBar: AppBar(
-            leading: IconButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              icon: Icon(IconBroken.Arrow___Left_2),
-            ),
             title: Text(
               'Weight',
               style: TextStyle(

@@ -14,6 +14,9 @@ import 'package:fristapp/shared/network/local/sqldb.dart';
 import 'package:fristapp/shared/styles/icon_broken.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
+import 'package:health/health.dart';
+
+import '../Firebase/reset_password.dart';
 
 class Settingsscreen extends StatelessWidget {
   late final AudioCache _audioCache;
@@ -28,6 +31,9 @@ class Settingsscreen extends StatelessWidget {
         newDocNum.text = usermodel!.phone;
         return SingleChildScrollView(
           child: Container(
+            decoration: BoxDecoration(
+              color: Colors.grey[200],
+            ),
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Column(
@@ -84,290 +90,410 @@ class Settingsscreen extends StatelessWidget {
                   SizedBox(
                     height: 10.0,
                   ),
-                  Row(
-                    children: [
+                  Card(
+                    color: Colors.white,
+                    child: Row(children: [
                       Column(
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            '${usermodel.name}',
-                            style:
-                                Theme.of(context).textTheme.bodyText1!.copyWith(
-                                      fontSize: 25.0,
-                                      fontWeight: FontWeight.bold,
-                                      color: defultColor,
-                                    ),
+                          SizedBox(
+                            height: 10,
                           ),
                           Text(
-                            '${usermodel.email}',
+                            '\tPersonal information',
+                            style:
+                                Theme.of(context).textTheme.bodyText1!.copyWith(
+                              fontSize: 20.0,
+                              color: Colors.blue,
+                              shadows: [
+                                BoxShadow(
+                                  color: Colors.black,
+                                  offset: Offset(1.0, 1.0),
+                                  blurRadius: 3.0,
+                                )
+                              ],
+                            ),
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Text(
+                            '\t\t${usermodel.name}',
+                            style:
+                                Theme.of(context).textTheme.bodyText1!.copyWith(
+                                      fontSize: 22.0,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Text(
+                            '\t${usermodel.email}',
                             style:
                                 Theme.of(context).textTheme.bodyText1!.copyWith(
                                       fontSize: 20.0,
                                       fontWeight: FontWeight.normal,
                                     ),
                           ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Center(
+                            child: TextButton(
+                                onPressed: () {
+                                  NavigetTo(context, ResetScreen());
+                                },
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      'Reset password ',
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                      ),
+                                    ),
+                                    Icon(Icons.share_arrival_time_outlined),
+                                  ],
+                                )),
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
                         ],
                       ),
-                    ],
+                    ]),
                   ),
+
                   SizedBox(
-                    height: 14.0,
+                    height: 10.0,
                   ),
-                  MyDivider(),
-                  SizedBox(
-                    height: 14.0,
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(
-                      bottom: 5.0,
-                      top: 5.0,
-                      left: 10.0,
-                      right: 10.0,
-                    ),
-                    child: Row(
-                      children: [
-                        Text(
-                          'Doctor Number: ${cubit.doc_num}',
-                          style: TextStyle(
-                            fontSize: 20,
-                          ),
-                        ),
-                        Spacer(),
-                        IconButton(
-                            onPressed: () {
-                              showDialog(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                        title: Text('Doctor Number'),
-                                        content: TextField(
-                                          autofocus: true,
-                                          controller: newDocNum,
-                                          decoration: InputDecoration(
-                                              hintText:
-                                                  'Number of the attending physician'),
-                                        ),
-                                        actions: [
-                                          TextButton(
-                                              child: Text('Cancel'),
-                                              onPressed: () {
-                                                Navigator.pop(context);
-                                              }),
-                                          TextButton(
-                                              child: Text('Submit'),
-                                              onPressed: () {
-                                                cubit.edite_number(
-                                                    newDocNum.text, context);
-                                                if (cubit.isupdated) {
-                                                  FirebaseFirestore.instance
-                                                      .collection(Users)
-                                                      .doc(usermodel.uId)
-                                                      .update({
-                                                    'phone': cubit.doc_num
-                                                  }).then((value) {
-                                                    cubit.isupdated = false;
-                                                    print('Number Updated');
-                                                  });
-                                                }
-                                              }),
-                                        ],
-                                      ));
-                              // _audioCache.play('my_audio.mp3');
-                            },
-                            icon: Icon(IconBroken.Edit)),
-                      ],
-                    ),
-                  ),
-                  SizedBox(
-                    height: 14.0,
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          height: 40,
-                          child: OutlinedButton(
-                            onPressed: () async {
-                              cubit.Request_Connect();
-                            },
-                            child: Text(
-                              'Link to Google Fit',
+                  Card(
+                    color: Colors.white,
+                    child: Row(children: [
+                      Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Text(
+                              '\tStatus',
                               style: Theme.of(context)
                                   .textTheme
                                   .bodyText1!
                                   .copyWith(
-                                    fontSize: 18.0,
-                                    fontWeight: FontWeight.normal,
-                                    color: defultColor,
-                                  ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  MyDivider(),
-                  SizedBox(
-                    height: 14.0,
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Activate',
-                          style:
-                              Theme.of(context).textTheme.bodyText1!.copyWith(
-                                    fontSize: 22.0,
-                                    fontWeight: FontWeight.normal,
-                                  ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Transform.scale(
-                          scale: 1.5,
-                          child: Switch(
-                            value: cubit.isOn,
-                            onChanged: (value) async {
-                              cubit.ChangeisOn(fromShared: value);
-                            },
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 20.0,
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          height: 40,
-                          child: OutlinedButton(
-                            onPressed: () async {
-                              SqlDb _sqlDb = SqlDb();
-                              await _sqlDb.mydeleteDatabase();
-                            },
-                            child: Text(
-                              'Delete Your Information',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyText1!
-                                  .copyWith(
-                                    fontSize: 16.0,
-                                    fontWeight: FontWeight.normal,
-                                    color: Colors.red,
-                                  ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 14.0,
-                  ),
-                  MyDivider(),
-                  Container(
-                    height: 20.0,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            'Dark Mode',
-                            style:
-                                Theme.of(context).textTheme.bodyText1!.copyWith(
-                                      fontSize: 18.0,
-                                      fontWeight: FontWeight.normal,
-                                    ),
-                          ),
-                        ),
-                        Switch(
-                          value: GPCubit.get(context).IsDark,
-                          onChanged: (value) {
-                            GPCubit.get(context).ChangeAppMode();
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(
-                    height: 14.0,
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          height: 40,
-                          child: OutlinedButton(
-                            onPressed: () {
-                              NavidetAndFinish(context, LoginScreen());
-                              CachHelper.removeData(key: 'uId');
-                              cubit.currentIndex = 0;
-                            },
-                            child: Text(
-                              'Log Out',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyText1!
-                                  .copyWith(
-                                    fontSize: 16.0,
-                                    fontWeight: FontWeight.normal,
-                                    color: defultColor,
-                                  ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 14.0,
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          height: 40,
-                          child: OutlinedButton(
-                            onPressed: () => showDialog<String>(
-                              context: context,
-                              builder: (BuildContext context) => AlertDialog(
-                                title: const Text('Delete Account'),
-                                content: const Text(
-                                  'Erase all your data',
-                                  style: TextStyle(
-                                    color: Colors.red,
-                                  ),
-                                ),
-                                actions: <Widget>[
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.pop(context, 'Cancel'),
-                                    child: const Text('Cancel'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      cubit.UserDeleteAccount();
-                                      NavidetAndFinish(
-                                          context, OnBoardingScreen());
-                                      CachHelper.removeData(key: 'uId');
-                                      cubit.currentIndex = 0;
-                                    },
-                                    child: const Text('OK'),
-                                  ),
+                                fontSize: 20.0,
+                                color: Colors.blue,
+                                shadows: [
+                                  BoxShadow(
+                                    color: Colors.black,
+                                    offset: Offset(1.0, 1.0),
+                                    blurRadius: 3.0,
+                                  )
                                 ],
                               ),
                             ),
-                            child: Text(
-                              'Delete Your Account',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyText1!
-                                  .copyWith(
-                                    fontSize: 16.0,
-                                    fontWeight: FontWeight.normal,
+                            SizedBox(
+                              height: 5,
+                            ),
+                            Row(
+                              children: [
+                                Text(
+                                  '\tGlucose tracking',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyText1!
+                                      .copyWith(
+                                        fontSize: 18.0,
+                                        fontWeight: FontWeight.normal,
+                                      ),
+                                ),
+                                SizedBox(
+                                  width: 10,
+                                ),
+                                Row(
+                                  children: [
+                                    Transform.scale(
+                                      scale: 1,
+                                      child: Switch(
+                                        value: cubit.isOn,
+                                        onChanged: (value) async {
+                                          if (cubit.isConnected) {
+                                            cubit.ChangeisOn(fromShared: value);
+                                          } else {
+                                            showToast(
+                                                msg:
+                                                    'Connect to google Fit First',
+                                                state: toastStates.WARNING);
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 5,
+                                    ),
+                                    Text(
+                                      cubit.isOn ? 'On' : 'Off',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyText1!
+                                          .copyWith(
+                                            fontSize: 18.0,
+                                            fontWeight: FontWeight.normal,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            SizedBox(
+                              height: 4.0,
+                            ),
+                            Row(
+                              children: [
+                                Text(
+                                  '\t Doctor Number: ${cubit.doc_num}',
+                                  style: TextStyle(
+                                    fontSize: 18,
                                   ),
+                                ),
+                                IconButton(
+                                    onPressed: () {
+                                      showDialog(
+                                          context: context,
+                                          builder: (context) => AlertDialog(
+                                                title: Text('Doctor Number'),
+                                                content: TextField(
+                                                  autofocus: true,
+                                                  controller: newDocNum,
+                                                  decoration: InputDecoration(
+                                                      hintText:
+                                                          'Number of the attending physician'),
+                                                ),
+                                                actions: [
+                                                  TextButton(
+                                                      child: Text('Cancel'),
+                                                      onPressed: () {
+                                                        Navigator.pop(context);
+                                                      }),
+                                                  TextButton(
+                                                      child: Text('Submit'),
+                                                      onPressed: () {
+                                                        cubit.edite_number(
+                                                            newDocNum.text,
+                                                            context);
+                                                        if (cubit.isupdated) {
+                                                          FirebaseFirestore
+                                                              .instance
+                                                              .collection(Users)
+                                                              .doc(
+                                                                  usermodel.uId)
+                                                              .update({
+                                                            'phone':
+                                                                cubit.doc_num
+                                                          }).then((value) {
+                                                            cubit.isupdated =
+                                                                false;
+                                                            print(
+                                                                'Number Updated');
+                                                          });
+                                                        }
+                                                      }),
+                                                ],
+                                              ));
+                                      // _audioCache.play('my_audio.mp3');
+                                    },
+                                    icon: Row(
+                                      children: [
+                                        Icon(
+                                          IconBroken.Edit,
+                                          color: Colors.blue,
+                                          size: 30.0,
+                                        ),
+                                      ],
+                                    )),
+                              ],
+                            ),
+                            SizedBox(
+                              height: 5.0,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                SizedBox(
+                                  width: 15.0,
+                                ),
+                                Container(
+                                  height: 40,
+                                  child: Center(
+                                    child: OutlinedButton(
+                                      onPressed: () async {
+                                        cubit.Request_Connect();
+                                      },
+                                      child: Text(
+                                        cubit.isConnected
+                                            ? 'Connected to google fit ✅'
+                                            : 'Tap to connect google fit ⚠️',
+                                        style: cubit.isConnected
+                                            ? Theme.of(context)
+                                                .textTheme
+                                                .bodyText1!
+                                                .copyWith(
+                                                  fontSize: 20.0,
+                                                  fontWeight: FontWeight.normal,
+                                                  color: Colors.green,
+                                                )
+                                            : Theme.of(context)
+                                                .textTheme
+                                                .bodyText1!
+                                                .copyWith(
+                                                  fontSize: 20.0,
+                                                  fontWeight: FontWeight.normal,
+                                                  color: Color.fromARGB(
+                                                      255, 206, 185, 0),
+                                                ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(
+                              height: 14.0,
+                            ),
+                          ]),
+                    ]),
+                  ),
+
+                  SizedBox(
+                    height: 10.0,
+                  ),
+
+                  // Dark Mode
+                  // Container(
+                  //   height: 20.0,
+                  //   child: Row(
+                  //     children: [
+                  //       Expanded(
+                  //         child: Text(
+                  //           'Dark Mode',
+                  //           style:
+                  //               Theme.of(context).textTheme.bodyText1!.copyWith(
+                  //                     fontSize: 18.0,
+                  //                     fontWeight: FontWeight.normal,
+                  //                   ),
+                  //         ),
+                  //       ),
+                  //       Switch(
+                  //         value: GPCubit.get(context).IsDark,
+                  //         onChanged: (value) {
+                  //           GPCubit.get(context).ChangeAppMode();
+                  //         },
+                  //       ),
+                  //     ],
+                  //   ),
+                  // ),
+
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          height: 40,
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                              left: 10.0,
+                              right: 10.0,
+                            ),
+                            child: OutlinedButton(
+                              style: ButtonStyle(
+                                backgroundColor:
+                                    MaterialStateProperty.all(Colors.white),
+                              ),
+                              onPressed: () {
+                                CachHelper.removeData(key: 'uId');
+                                cubit.currentIndex = 0;
+                                NavidetAndFinish(context, OnBoardingScreen());
+                              },
+                              child: Text(
+                                'Log Out',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyText2!
+                                    .copyWith(
+                                      fontSize: 20.0,
+                                      fontWeight: FontWeight.normal,
+                                      color: Colors.black,
+                                    ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 14.0,
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          height: 40,
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                              left: 10.0,
+                              right: 10.0,
+                            ),
+                            child: OutlinedButton(
+                              style: ButtonStyle(
+                                backgroundColor:
+                                    MaterialStateProperty.all(Colors.white),
+                              ),
+                              onPressed: () => showDialog<String>(
+                                context: context,
+                                builder: (BuildContext context) => AlertDialog(
+                                  title: const Text('Delete Account'),
+                                  content: const Text(
+                                    'Erase all your data',
+                                    style: TextStyle(
+                                      color: Colors.red,
+                                    ),
+                                  ),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.pop(context, 'Cancel'),
+                                      child: const Text('Cancel'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        cubit.UserDeleteAccount();
+                                        CachHelper.removeData(key: 'uId');
+                                        cubit.currentIndex = 0;
+                                        NavidetAndFinish(
+                                            context, OnBoardingScreen());
+                                      },
+                                      child: const Text('OK'),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              child: Text(
+                                'Delete Your Account',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyText2!
+                                    .copyWith(
+                                      fontSize: 20.0,
+                                      fontWeight: FontWeight.normal,
+                                      color: Color.fromARGB(255, 241, 27, 27),
+                                    ),
+                              ),
                             ),
                           ),
                         ),
@@ -377,23 +503,6 @@ class Settingsscreen extends StatelessWidget {
                   SizedBox(
                     height: 20.0,
                   ),
-                  RaisedButton(
-                      child: Text('Make Action'),
-                      onPressed: () async {
-                        await FlutterPhoneDirectCaller.callNumber(
-                            '${cubit.doc_num}');
-                        // 01017253775
-                        print('Done');
-                      }),
-                      SizedBox(
-                        height: 10,
-                      ),
-                  RaisedButton(
-                      child: Text('ADD data to google fit'),
-                      onPressed: () async {
-                        cubit.addData();
-                        print('Data Added');
-                      }),
                 ],
               ),
             ),

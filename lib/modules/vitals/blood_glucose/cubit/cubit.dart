@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fristapp/modules/vitals/blood_glucose/activity_glucose.dart';
 import 'package:fristapp/modules/vitals/blood_glucose/cubit/states.dart';
 import 'package:fristapp/modules/vitals/blood_glucose/date_glucose.dart';
+import 'package:health/health.dart';
 
 import '../../../../model/chart_data_model.dart';
 import '../../../../shared/network/local/sqldb.dart';
@@ -87,10 +88,8 @@ class GlucoseCubit extends Cubit<GlucoseStates> {
     List<Map> new_response = [];
 
     for (int i = 0; i < 24; i++) {
-      print(from!.add(new Duration(hours: 1)));
-
       List<Map> _newresponse = await _sqlDb.readData(
-          "SELECT `Glucosevalue` FROM 'Glucosetable' WHERE `Glucosedate` > '${from.add(new Duration(hours: i))}' AND `Glucosedate` < '${from.add(new Duration(hours: (i + 1)))}'");
+          "SELECT `Glucosevalue` FROM 'Glucosetable' WHERE `Glucosedate` > '${from!.add(new Duration(hours: i))}' AND `Glucosedate` < '${from.add(new Duration(hours: (i + 1)))}'");
       double sum = 0;
       _newresponse.forEach((element) {
         sum += double.parse(element['Glucosevalue']);
@@ -101,17 +100,12 @@ class GlucoseCubit extends Cubit<GlucoseStates> {
       } else {
         new_response.add({
           '${from.add(new Duration(hours: (i + 1)))}':
-              (sum / _newresponse.length).toInt()
+              (sum ~/ _newresponse.length).toInt()
         });
       }
     }
-    // print(new_response);
 
     new_response.forEach((element) {
-      // print("Date ${element['Glucosedate']}  => ${element['Glucosevalue']}");
-
-      print(element.keys.single.toString());
-
       _getChartData.add(ChartData(
           DateTime.parse(element.keys.single.toString()),
           double.parse(element.values.single.toString()).round()));
@@ -136,5 +130,27 @@ class GlucoseCubit extends Cubit<GlucoseStates> {
     await readData(
         from: getSelectedate(), to: getSelectedate().add(Duration(days: 1)));
     emit(GlucoseChangeTopNavBartoDaysState());
+  }
+
+  //
+  DateTime sselectedate = DateTime.now().subtract(Duration(days: 7));
+  void ssetSelectedate(DateTime date) {
+    sselectedate = date;
+  }
+
+  DateTime getsSelectedate() {
+    return sselectedate;
+  }
+
+  HealthFactory health = HealthFactory();
+  addglucoseToGooglefit({glucose, date}) async {
+    emit(GlucoseStartAddToGoogleFitSuccessState());
+    bool _success = await health.writeHealthData(
+        glucose!, HealthDataType.BLOOD_GLUCOSE, date, date);
+    if (_success) {
+      emit(GlucoseAddedToGoogleFitSuccessState());
+    } else {
+      emit(GlucoseAddedToGoogleFitErrorState());
+    }
   }
 }

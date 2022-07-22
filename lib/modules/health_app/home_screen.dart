@@ -14,11 +14,15 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<GPCubit, GPStates>(
-      listener: (context, state) {},
+      listener: (context, state) {
+        if (state is ModelCycleSuccessState) {
+          showToast(
+              msg: "${state.val} mg/dL Added", state: toastStates.SUCCESS);
+        }
+      },
       builder: (context, state) {
         var cubit = GPCubit.get(context);
         TooltipBehavior _tooltipBehavior = TooltipBehavior(enable: true);
-        var modeResponse;
         return Scaffold(
           body: RefreshIndicator(
             onRefresh: cubit.fetchtodayglucose,
@@ -290,33 +294,6 @@ class HomeScreen extends StatelessWidget {
                   SizedBox(
                     height: 8.0,
                   ),
-                  //
-                  // SizedBox(
-                  //   height: 50,
-                  // ),
-                  // MyDivider(),
-                  // Padding(
-                  //   padding: const EdgeInsets.all(20.0),
-                  //   child: Row(
-                  //     children: [
-                  //       Expanded(
-                  //           child: RaisedButton(
-                  //               child: Text('Predict'),
-                  //               onPressed: () async {
-                  //                 modeResponse = await cubit.fetchModel(
-                  //                     'https://tessssssst.azurewebsites.net/'
-                  //                     // '10.0.2.2:5000/api?query=A'
-                  //                     );
-                  //                 // var decoded = jsonDecode(modeResponse);
-                  //                 print(modeResponse);
-                  //               })),
-                  //       SizedBox(
-                  //         width: 10.0,
-                  //       ),
-                  //       Expanded(child: Text('Output:   ${0}')),
-                  // ],
-                  // ),
-                  // )
                 ],
               ),
             ),
@@ -325,21 +302,4 @@ class HomeScreen extends StatelessWidget {
       },
     );
   }
-
-  // List<GlucoseData> getChartData() {
-  //   final List<GlucoseData> chartData = [
-  //     GlucoseData(5.5, 75),
-  //     GlucoseData(6, 82),
-  //     GlucoseData(7, 92),
-  //     GlucoseData(7.5, 100),
-  //     GlucoseData(8, 80)
-  //   ];
-  //   return chartData;
-  // }
 }
-
-// class GlucoseData {
-//   GlucoseData(this.time, this.glucose);
-//   final double time;
-//   final double glucose;
-// }

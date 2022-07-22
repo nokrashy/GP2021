@@ -62,9 +62,33 @@ class MOdelLoadingState extends GPStates {}
 
 class ChangeisOnState extends GPStates {}
 
-class ModelCycleState extends GPStates {}
+class ModelCycleSuccessState extends GPStates {
+  final String val;
+  ModelCycleSuccessState(this.val);
+}
+
+class ModelCycleErrorState extends GPStates {}
 
 class ModelCycleOFFState extends GPStates {}
 
+class GlucoseStartAddToGoogleFitSuccessState extends GPStates {}
+
+class GlucoseAddedToGoogleFitSuccessState extends GPStates {}
+
+class GlucoseAddedToGoogleFitErrorState extends GPStates {}
+
+class GetLast15ErrorState extends GPStates {}
+
 // Home Screen
 class HomeScreenRefreshedState extends GPStates {}
+
+// Settings Screen
+class IsConnectedSTrueState extends GPStates {}
+
+class IsConnectedFalseState extends GPStates {}
+
+class ResetLoadingState extends GPStates {}
+
+class ResetSuccessState extends GPStates {}
+
+class ResetErrorState extends GPStates {}

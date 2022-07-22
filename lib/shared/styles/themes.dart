@@ -54,6 +54,7 @@ ThemeData darkTheme = ThemeData(
 ThemeData lightTheme = ThemeData(
   primarySwatch: defultColor,
   scaffoldBackgroundColor: Colors.white,
+  //
   appBarTheme: AppBarTheme(
     // ignore: deprecated_member_use
     backwardsCompatibility: false,
@@ -61,8 +62,10 @@ ThemeData lightTheme = ThemeData(
       statusBarColor: Colors.white,
       statusBarIconBrightness: Brightness.dark,
     ),
+
     backgroundColor: Colors.white,
-    elevation: 0.0,
+    shadowColor: Colors.blue,
+    elevation: 2.0,
     titleTextStyle: TextStyle(
       color: Colors.black,
       fontSize: 20.0,
@@ -72,6 +75,7 @@ ThemeData lightTheme = ThemeData(
       color: Colors.black,
     ),
   ),
+
   floatingActionButtonTheme: FloatingActionButtonThemeData(
     backgroundColor: defultColor,
   ),

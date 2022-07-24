@@ -85,10 +85,11 @@ class MyApp extends StatelessWidget {
         BlocProvider(
             create: (context) => GPCubit()
               ..ChangeAppMode(fromShared: isDark)
-              ..ChangeisOn(fromShared: isOn)
               ..getisConnected(fromShared: isConnected)
-              ..getUserData()
-              ..fetchtodayglucose()
+            ..ChangeisOn(fromShared: isOn)
+            ..initPlatformState(isOn)
+            ..getUserData()
+            ..fetchtodayglucose()
             // ..fetchData()
             // ..fetchStepData()
             ),

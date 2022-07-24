@@ -22,11 +22,11 @@ import 'package:health/health.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'dart:math';
-
 import '../../model/chart_data_model.dart';
 import '../../modules/Firebase/firebase.dart';
 import '../../modules/vitals/blood_glucose/cubit/cubit.dart';
 import 'Constant/google_fit_functions.dart';
+import 'package:background_mode/background_mode.dart';
 
 class GPCubit extends Cubit<GPStates> {
   GPCubit() : super(InitialState());
@@ -107,20 +107,22 @@ class GPCubit extends Cubit<GPStates> {
 // Request Connect to google fit
   bool AuthorizationRequested = false;
   bool isConnected = false;
-  void getisConnected({bool? fromShared}) {
-    if (fromShared != false) {
-      isConnected = true;
+  void getisConnected({bool? fromShared}) async {
+    if (fromShared != null) {
+
+      isConnected = fromShared;
+      CachHelper.saveData(key: 'isConnected', value: isConnected);
       emit(IsConnectedSTrueState());
     } else
       isConnected = false;
     CachHelper.saveData(key: 'isConnected', value: isConnected).then((value) {
       emit(IsConnectedFalseState());
     });
-    // if (isConnected == true) {
-    //   modelCycleOn();
-    // } else {
-    //   modelCycleOff();
-    // }
+    if (isConnected == true) {
+      modelCycleOn();
+    } else {
+      modelCycleOff();
+    }
   }
 
   //
@@ -537,20 +539,37 @@ class GPCubit extends Cubit<GPStates> {
   void ChangeisOn({bool? fromShared}) {
     if (fromShared != null) {
       isOn = fromShared;
+      CachHelper.saveData(key: 'isOn', value: isOn).then((value) {
+        emit(ChangeisOnState());
+      });
     } else
-      isOn = !isOn;
+      isOn = false;
     CachHelper.saveData(key: 'isOn', value: isOn).then((value) {
       emit(ChangeisOnState());
     });
     if (isOn == true) {
       modelCycleOn();
+      print("**************************ON*************************");
     } else {
       modelCycleOff();
+      print("**************************Off*************************");
     }
+  }
+
+  void initPlatformState(bool backOn) async {
+    // if (backOn != Null) {
+    //   if (backOn == true) {
+    //     BackgroundMode.start();
+    //   } else {
+    //     BackgroundMode.disable();
+    //     BackgroundMode.bringToForeground();
+    //   }
+    // }
   }
 
   Timer? timer;
   void modelCycleOn() {
+    initPlatformState(true);
     const oneSec = Duration(minutes: 15);
     timer = Timer.periodic(oneSec, (Timer t) {
       refreshandfetch().then((value) {
@@ -586,6 +605,8 @@ class GPCubit extends Cubit<GPStates> {
   }
 
   void modelCycleOff() {
+    initPlatformState(false);
+
     if (timer != null) {
       timer?.cancel();
       print('Timer Turned OFF');

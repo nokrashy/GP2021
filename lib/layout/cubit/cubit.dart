@@ -108,7 +108,7 @@ class GPCubit extends Cubit<GPStates> {
   bool AuthorizationRequested = false;
   bool isConnected = false;
   void getisConnected({bool? fromShared}) {
-    if (fromShared != null) {
+    if (fromShared != false) {
       isConnected = true;
       emit(IsConnectedSTrueState());
     } else
@@ -442,7 +442,8 @@ class GPCubit extends Cubit<GPStates> {
       });
 // -----------------------------------------------------------------------------------------------------------
 // ***********************************Settings Screen *************************
-  Future<AuthStatus> resetPassword({required String email,required BuildContext context}) async {
+  Future<AuthStatus> resetPassword(
+      {required String email, required BuildContext context}) async {
     emit(ResetLoadingState());
     late AuthStatus _status;
     await FirebaseAuth.instance

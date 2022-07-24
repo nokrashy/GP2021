@@ -11,7 +11,7 @@ import 'package:fristapp/shared/network/remote/dio_helper.dart';
 class LoginCubit extends Cubit<LoginStates> {
   LoginCubit() : super(LoginInitialState());
   static LoginCubit get(context) => BlocProvider.of(context);
-
+  int count_login_failed = 0;
   void UserLogin({required String email, required String passWord}) {
     emit(LoginLoadingState());
     FirebaseAuth.instance
@@ -22,13 +22,13 @@ class LoginCubit extends Cubit<LoginStates> {
         .then((value) {
       print(value.user!.email);
       print(value.user!.uid);
+      count_login_failed = 0;
       emit(LoginSuccessState(value.user!.uid));
     }).catchError((Error) {
+      count_login_failed += 1;
       emit(LoginErrorState(Error.toString()));
     });
   }
-
-  
 
   bool IsPassward = true;
   IconData suffix = Icons.visibility_off_outlined;

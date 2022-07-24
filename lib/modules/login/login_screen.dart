@@ -13,6 +13,7 @@ import 'package:fristapp/shared/network/remote/dio_helper.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../shared/component/constants.dart';
+import '../Firebase/reset_password.dart';
 
 class LoginScreen extends StatelessWidget {
   var emailController = TextEditingController();
@@ -43,6 +44,7 @@ class LoginScreen extends StatelessWidget {
           });
         }
       }, builder: (context, State) {
+        var cubit = LoginCubit.get(context);
         return Scaffold(
             appBar: AppBar(),
             body: Center(
@@ -112,9 +114,25 @@ class LoginScreen extends StatelessWidget {
                             }
                           },
                         ),
-                        SizedBox(
-                          height: 15.0,
-                        ),
+                        cubit.count_login_failed >= 3
+                            ? Column(
+                                children: [
+                                  Center(
+                                    child: defultTextButton(
+                                      onPressed: () {
+                                        NavigetTo(context, ResetScreen());
+                                      },
+                                      text: 'Forgotten password?',
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: 5.0,
+                                  ),
+                                ],
+                              )
+                            : SizedBox(
+                                height: 10.0,
+                              ),
                         ConditionalBuilder(
                           condition: State is! LoginLoadingState,
                           builder: (context) => defulteButton(

@@ -29,16 +29,18 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   List<BoardingModel> boaerding = [
     BoardingModel(
         image: 'assets/images/on1.jpg',
-        titel: 'Always be under observation',
-        body: 'My Health'),
+        body: 'You will be reassured if you have a hypoglycemic episode⌚📱',
+        titel:
+            'Connect your smart watch to Google fit app by your  gmail 📲 \n\nConnect your email to our app'),
     BoardingModel(
         image: 'assets/images/on2.jpg',
-        titel: 'And get the suitable care',
-        body: 'Understanding diabetes'),
+        titel: 'Just keep you watch 24 hour automatically monitoring mode ⌚',
+        body: 'You will get suitable care by monitoring your vital signs 🔁'),
     BoardingModel(
         image: 'assets/images/on3.jpg',
-        titel: 'Let’s fight type 1 diabetes',
-        body: 'Find the balance'),
+        body: 'You will be always under observation 🌝',
+        titel:
+            'Type 1 diabetes  non invasive glucose monitoring won\'t be a challenge now 💫'),
   ];
 
   @override
@@ -57,7 +59,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 20.0),
         child: Column(
           children: [
             Expanded(
@@ -139,17 +141,17 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
         ),
         Text(
           '${model.body}',
-          style: TextStyle(fontSize: 28.0, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.w500),
         ),
         SizedBox(
-          height: 25.0,
+          height: 10.0,
         ),
         Text(
           '${model.titel}',
-          style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w400),
         ),
         SizedBox(
-          height: 25.0,
+          height: 5.0,
         ),
       ],
     );

@@ -45,45 +45,46 @@ class Settingsscreen extends StatelessWidget {
                       children: [
                         Align(
                           child: Container(
-                            height: 150.0,
+                            height: 200.0,
                             width: double.infinity,
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(
-                                  10.0,
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(
+                                    20.0,
+                                  ),
+                                  topRight: Radius.circular(
+                                    20.0,
+                                  ),
+                                  bottomLeft: Radius.circular(
+                                    20.0,
+                                  ),
+                                  bottomRight: Radius.circular(
+                                    20.0,
+                                  ),
                                 ),
-                                topRight: Radius.circular(
-                                  10.0,
-                                ),
-                              ),
-                              image: DecorationImage(
-                                image: NetworkImage(
-                                  usermodel.cover != null
-                                      ? '${usermodel.cover}'
-                                      : 'https://firebasestorage.googleapis.com/v0/b/first-ptoject-c0cec.appspot.com/o/default%2Fhospital.png?alt=media&token=9f64353a-cc3f-45ce-a2ae-d79510f78790',
-                                ),
-                                fit: BoxFit.cover,
-                              ),
-                            ),
+                                image: DecorationImage(
+                                  image: AssetImage('assets/images/cover.jpg'),
+                                  fit: BoxFit.cover,
+                                )),
                           ),
                           alignment: AlignmentDirectional.topCenter,
                         ),
-                        Align(
-                          child: CircleAvatar(
-                            radius: 55.0,
-                            foregroundColor: Colors.white,
-                            backgroundColor: Colors.white,
-                            child: CircleAvatar(
-                              radius: 60.0,
-                              backgroundImage: NetworkImage(
-                                usermodel.image != null
-                                    ? '${usermodel.image}'
-                                    : 'https://firebasestorage.googleapis.com/v0/b/first-ptoject-c0cec.appspot.com/o/default%2Fpharmacist.png?alt=media&token=597ebcef-6b26-46f4-b579-672805412efb',
-                              ),
-                            ),
-                          ),
-                          alignment: AlignmentDirectional.bottomStart,
-                        ),
+                        // Align(
+                        //   child: CircleAvatar(
+                        //     radius: 55.0,
+                        //     foregroundColor: Colors.white,
+                        //     backgroundColor: Colors.white,
+                        //     child: CircleAvatar(
+                        //       radius: 60.0,
+                        //       backgroundImage: NetworkImage(
+                        //         usermodel.image != null
+                        //             ? '${usermodel.image}'
+                        //             : 'https://firebasestorage.googleapis.com/v0/b/first-ptoject-c0cec.appspot.com/o/default%2Fpharmacist.png?alt=media&token=597ebcef-6b26-46f4-b579-672805412efb',
+                        //       ),
+                        //     ),
+                        //   ),
+                        //   alignment: AlignmentDirectional.bottomStart,
+                        // ),
                       ],
                     ),
                   ),
@@ -417,7 +418,7 @@ class Settingsscreen extends StatelessWidget {
                               onPressed: () {
                                 CachHelper.removeData(key: 'uId');
                                 cubit.currentIndex = 0;
-                                NavidetAndFinish(context, OnBoardingScreen());
+                                NavidetAndFinish(context, LoginScreen());
                               },
                               child: Text(
                                 'Log Out',

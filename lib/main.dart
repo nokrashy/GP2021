@@ -6,6 +6,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fristapp/layout/cubit/cubit.dart';
 import 'package:fristapp/layout/cubit/states.dart';
 import 'package:fristapp/layout/home_layout.dart';
@@ -18,6 +19,7 @@ import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:permission_handler/permission_handler.dart';
 import 'layout/cubit/Constant/google_fit_functions.dart';
 import 'layout/cubit/Constant/google_fit_functions.dart';
+import 'layout/cubit/Notification.dart';
 import 'modules/login/login_screen.dart';
 import 'modules/on_boarding/on_boarding_screen.dart';
 import 'modules/vitals/Height/cubit/cubit.dart';
@@ -46,6 +48,25 @@ void main() async {
   bool isDark = await CachHelper.getData(key: 'isDark');
   bool isOn = await CachHelper.getData(key: 'isOn');
   bool isConnected = await CachHelper.getData(key: 'isConnected');
+//
+  await NotificationService().init().then((value) => print(
+      "-------------------------------Notification INishalized------------------------"));
+
+  // InitialiseNotification() {
+  //   var initializationSettingsAndroid =
+  //       AndroidInitializationSettings('@mipmap/ic_launcher');
+  //   var initializationSettingsIOS = IOSInitializationSettings();
+
+  //   var initializationSettings = InitializationSettings(
+  //     android: initializationSettingsAndroid,
+  //     iOS: initializationSettingsIOS,
+  //   );
+
+  //   FlutterLocalNotificationsPlugin().initialize(
+  //     initializationSettings,
+  //   );
+  // }
+
 //
   // await Permission.activityRecognition.request();
 
@@ -86,10 +107,9 @@ class MyApp extends StatelessWidget {
             create: (context) => GPCubit()
               ..ChangeAppMode(fromShared: isDark)
               ..getisConnected(fromShared: isConnected)
-            ..ChangeisOn(fromShared: isOn)
-            ..initPlatformState(isOn)
-            ..getUserData()
-            ..fetchtodayglucose()
+              ..ChangeisOn(fromShared: isOn)
+              ..getUserData()
+              ..fetchtodayglucose()
             // ..fetchData()
             // ..fetchStepData()
             ),

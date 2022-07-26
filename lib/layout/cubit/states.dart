@@ -92,3 +92,9 @@ class ResetLoadingState extends GPStates {}
 class ResetSuccessState extends GPStates {}
 
 class ResetErrorState extends GPStates {}
+
+class StartSendingNotificationLoadingState extends GPStates {}
+
+class StartSendingNotificationSuccesstate extends GPStates {}
+
+class StartSendingNotificationErrorState extends GPStates {}

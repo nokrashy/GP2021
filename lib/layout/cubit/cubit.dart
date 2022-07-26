@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fristapp/layout/cubit/states.dart';
@@ -109,7 +111,6 @@ class GPCubit extends Cubit<GPStates> {
   bool isConnected = false;
   void getisConnected({bool? fromShared}) async {
     if (fromShared != null) {
-
       isConnected = fromShared;
       CachHelper.saveData(key: 'isConnected', value: isConnected);
       emit(IsConnectedSTrueState());
@@ -556,26 +557,14 @@ class GPCubit extends Cubit<GPStates> {
     }
   }
 
-  void initPlatformState(bool backOn) async {
-    // if (backOn != Null) {
-    //   if (backOn == true) {
-    //     BackgroundMode.start();
-    //   } else {
-    //     BackgroundMode.disable();
-    //     BackgroundMode.bringToForeground();
-    //   }
-    // }
-  }
-
   Timer? timer;
   void modelCycleOn() {
-    initPlatformState(true);
-    const oneSec = Duration(minutes: 15);
+    const oneSec = Duration(minutes: 5);
     timer = Timer.periodic(oneSec, (Timer t) {
       refreshandfetch().then((value) {
         getLast15().then((value) {
           predictPrice(
-            url: 'https://tessssssst.azurewebsites.net//Mypredict',
+            url: 'https://hypoglycemiatracking.azurewebsites.net//Mypredict',
             calories: calories_sum,
             hr: hr_avg,
             steps: steps_sum,
@@ -583,7 +572,7 @@ class GPCubit extends Cubit<GPStates> {
             insuline: insuline_sum,
             carbo: carbo_sum,
           ).then((value) {
-            print('Result : ${value}');
+            print('Result From Model is : ${value}');
             addglucoseToGooglefit(
               glucose: double.parse(value),
               date: DateTime.now(),
@@ -605,14 +594,80 @@ class GPCubit extends Cubit<GPStates> {
   }
 
   void modelCycleOff() {
-    initPlatformState(false);
-
     if (timer != null) {
       timer?.cancel();
       print('Timer Turned OFF');
     }
 
     emit(ModelCycleOFFState());
+  }
+
+  // Notification
+
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+
+  Future<void> SendNotification2() async {
+    const int insistentFlag = 4;
+    emit(StartSendingNotificationLoadingState());
+    AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
+      '1',
+      'Hypoglycemia Tracking app',
+      importance: Importance.max,
+      priority: Priority.high,
+      playSound: true,
+      enableVibration: true,
+      ticker: 'ticker',
+      additionalFlags: Int32List.fromList(<int>[insistentFlag]),
+      channelDescription: 'String', //Required for Android 8.0 or after
+    );
+    var iOSPlatformChannelSpecifics = IOSNotificationDetails(
+      threadIdentifier: 'thread_id',
+    );
+    var platformChannelSpecifics = NotificationDetails(
+        android: androidPlatformChannelSpecifics,
+        iOS: iOSPlatformChannelSpecifics);
+
+    await flutterLocalNotificationsPlugin
+        .show(1, 'Alert⚠️', "Your Glucose Level is Low 🛑",
+            platformChannelSpecifics,
+            payload: 'data')
+        .then((value) {
+      print('Success/******************************');
+      emit(StartSendingNotificationSuccesstate());
+    }).catchError((e) {
+      print('Error/****************************** :  ${e}');
+      emit(StartSendingNotificationErrorState());
+    });
+
+    // AndroidNotificationDetails(
+
+    // );
+
+    // Future.delayed(Duration(seconds: 2), () async {
+    //   AndroidNotificationDetails androidPlatformChannelSpecifics =
+    //       AndroidNotificationDetails(
+    //     '1.0',
+    //     'Hypoglycemia Tracking App',
+    //     importance: Importance.max,
+    //     priority: Priority.high,
+    //     playSound: true,
+    //     enableVibration: true,
+    //   );
+    //   var iOSPlatformChannelSpecifics = IOSNotificationDetails(
+    //     threadIdentifier: 'thread_id',
+    //   );
+    //   var platformChannelSpecifics = NotificationDetails(
+    //       android: androidPlatformChannelSpecifics,
+    //       iOS: iOSPlatformChannelSpecifics);
+    //   await FlutterLocalNotificationsPlugin().show(
+    //     5,
+    //     'Alert',
+    //     'Your Glucose level is Low',
+    //     platformChannelSpecifics,
+    //   );
+    // });
   }
 
   // ****Functions related to model cycle****
@@ -845,13 +900,19 @@ class GPCubit extends Cubit<GPStates> {
   }
 
   Future<void> set_condition_color_txt() async {
+    // Timer(Duration(seconds: 3), () {
+    // });
     if (getMinMaxGlucose()[2] < 54 && getMinMaxGlucose()[2] > 0) {
       codition_color = Color.fromARGB(255, 150, 0, 0);
       codition_txt = "Very Low";
-      await FlutterPhoneDirectCaller.callNumber('${doc_num}');
+      SendNotification2();
+      Timer(Duration(seconds: 10), () async {
+        await FlutterPhoneDirectCaller.callNumber('${doc_num}');
+      });
     } else if (getMinMaxGlucose()[2] >= 54 && getMinMaxGlucose()[2] < 70) {
       codition_color = Color.fromARGB(255, 250, 20, 20);
       codition_txt = "Low";
+      SendNotification2();
     } else if (getMinMaxGlucose()[2] >= 70 && getMinMaxGlucose()[2] <= 180) {
       codition_color = Colors.green;
       codition_txt = "Normal";

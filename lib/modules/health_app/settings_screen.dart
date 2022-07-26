@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:conditional_builder/conditional_builder.dart';
 import 'package:flutter/material.dart';
@@ -15,8 +17,8 @@ import 'package:fristapp/shared/styles/icon_broken.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:health/health.dart';
-
 import '../Firebase/reset_password.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class Settingsscreen extends StatelessWidget {
   late final AudioCache _audioCache;
@@ -503,6 +505,17 @@ class Settingsscreen extends StatelessWidget {
                   ),
                   SizedBox(
                     height: 20.0,
+                  ),
+                  RaisedButton(
+                    onPressed: () async {
+                      // / initial notifications
+                      // cubit.InitialiseNotification();
+
+                      Timer(Duration(seconds: 3), () {
+                        cubit.SendNotification2();
+                      });
+                    },
+                    child: Text('Send Notification'),
                   ),
                 ],
               ),

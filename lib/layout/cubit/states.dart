@@ -98,3 +98,21 @@ class StartSendingNotificationLoadingState extends GPStates {}
 class StartSendingNotificationSuccesstate extends GPStates {}
 
 class StartSendingNotificationErrorState extends GPStates {}
+
+class StartGPSLoadingState extends GPStates {}
+
+class StartGPSSuccesstate extends GPStates {}
+
+class StartGPSErrorState extends GPStates {}
+
+class StartSendLocationLoadingState extends GPStates {}
+
+class StaSendLocationSuccesstate extends GPStates {}
+
+class StaSendLocationErrorState extends GPStates {}
+
+class UserDeletedbLoadingState extends GPStates {}
+
+class UserDeletedbSuccessState extends GPStates {}
+
+class newUserDeletedbSuccessState extends GPStates {}

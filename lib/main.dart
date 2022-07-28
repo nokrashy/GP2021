@@ -29,6 +29,8 @@ import 'modules/vitals/heart_rate/cubit/cubit.dart';
 import 'modules/vitals/insuline/cubit/cubit.dart';
 import 'modules/vitals/steps/cubit/cubit.dart';
 import 'modules/vitals/weight/cubit/cubit.dart';
+import 'package:flutter_email_sender/flutter_email_sender.dart';
+import 'package:geolocator/geolocator.dart';
 
 // void printHello() {
 //   print('HElllllllllloooooooooooooooo');

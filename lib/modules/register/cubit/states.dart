@@ -24,3 +24,5 @@ class CraetUserErrorState extends RegisterStates {
 }
 
 class RegisterChangePasswordVisibilityState extends RegisterStates {}
+
+

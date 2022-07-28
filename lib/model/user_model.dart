@@ -9,6 +9,8 @@ class UserModel {
   late String cover;
   late String bio;
   late bool isEmailVerfied;
+  late String emergency_email;
+
   UserModel({
     this.name = '',
     this.email = '',
@@ -18,6 +20,7 @@ class UserModel {
     this.uId = '',
     this.image = '',
     this.cover = '',
+    this.emergency_email = '',
     this.bio = '',
     this.isEmailVerfied = false,
   });
@@ -27,6 +30,7 @@ class UserModel {
     phone = json['phone'];
     height = json['height'];
     weight = json['weight'];
+    emergency_email = json['emergency_email'];
     uId = json['uId'];
     image = json['image'];
     cover = json['cover'];
@@ -46,6 +50,7 @@ class UserModel {
       'image': image,
       'cover': cover,
       'bio': bio,
+      'emergency_email': emergency_email,
       'isEmailVerfied': isEmailVerfied,
     };
   }

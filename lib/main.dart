@@ -126,7 +126,7 @@ class MyApp extends StatelessWidget {
       ],
       child: BlocConsumer<GPCubit, GPStates>(
         listener: (context, state) {},
-        builder: (context, state) {
+        builder: (context, state) { 
           return MaterialApp(
             theme: lightTheme,
             darkTheme: darkTheme,

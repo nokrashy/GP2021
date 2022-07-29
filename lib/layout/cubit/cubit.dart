@@ -7,6 +7,7 @@ import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -20,6 +21,7 @@ import 'package:fristapp/shared/component/constants.dart';
 import 'package:fristapp/shared/network/local/cache_helper.dart';
 import 'package:fristapp/shared/network/local/sqldb.dart';
 import 'package:fristapp/shared/styles/icon_broken.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:health/health.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
@@ -82,6 +84,7 @@ class GPCubit extends Cubit<GPStates> {
     FirebaseFirestore.instance.collection('Users').doc(uId).get().then((value) {
       usermodel = UserModel.fromJson(value.data());
       doc_num = usermodel!.phone;
+      e_doc_num = usermodel!.emergency_email;
       emit(GetUserSuccessState());
     }).catchError((error) {
       print(error.toString());
@@ -105,6 +108,34 @@ class GPCubit extends Cubit<GPStates> {
 // ******************************      Google Fit      ******************************
   HealthFactory health = HealthFactory();
   List<HealthDataPoint> healthDataList = [];
+
+  // Handle Email
+  bool e_isupdated = false;
+  late String e_doc_num;
+  void e_edite_number(String e_newNum, BuildContext context) {
+    try {
+      var splitag = e_newNum.split(".");
+      if (splitag.last == 'com') {
+        e_doc_num = e_newNum;
+        e_isupdated = true;
+        showToast(
+            msg: 'Email Number Edited Successfully',
+            state: toastStates.SUCCESS);
+        Navigator.pop(context);
+        emit(HandlePhoneNumberSuccessState());
+      } else {
+        // Enter valid phone number
+        showToast(msg: 'Enter a valid number', state: toastStates.WARNING);
+
+        emit(HandlePhoneNumbererrorState());
+      }
+    } catch (error) {
+      print('error :  ${error}');
+      // Enter valid phone number
+      showToast(msg: 'Enter a valid Email', state: toastStates.WARNING);
+      emit(HandlePhoneNumbererrorState());
+    }
+  }
 
 // Request Connect to google fit
   bool AuthorizationRequested = false;
@@ -559,7 +590,7 @@ class GPCubit extends Cubit<GPStates> {
 
   Timer? timer;
   void modelCycleOn() {
-    const oneSec = Duration(minutes: 5);
+    const oneSec = Duration(minutes: 1);
     timer = Timer.periodic(oneSec, (Timer t) {
       refreshandfetch().then((value) {
         getLast15().then((value) {
@@ -908,6 +939,18 @@ class GPCubit extends Cubit<GPStates> {
       SendNotification2();
       Timer(Duration(seconds: 10), () async {
         await FlutterPhoneDirectCaller.callNumber('${doc_num}');
+        //
+        Timer(Duration(seconds: 15), () async {
+          // cubit.SendNotification2();
+          determinePosition().then((value) async {
+            print("Value: ${value}");
+            await send_location(value.latitude, value.longitude);
+          }).catchError((e) {
+            print('Error: ${e}');
+          });
+        });
+
+        //
       });
     } else if (getMinMaxGlucose()[2] >= 54 && getMinMaxGlucose()[2] < 70) {
       codition_color = Color.fromARGB(255, 250, 20, 20);
@@ -926,5 +969,58 @@ class GPCubit extends Cubit<GPStates> {
       codition_color = Colors.black;
       codition_txt = 'Refresh';
     }
+  }
+
+  // GPS
+
+  Future<Position> determinePosition() async {
+    emit(StartGPSLoadingState());
+    LocationPermission permission;
+
+    permission = await Geolocator.checkPermission();
+
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        emit(StartGPSErrorState());
+
+        return Future.error('Location Permissions are denied');
+      }
+    }
+    emit(StartGPSSuccesstate());
+
+    return await Geolocator.getCurrentPosition();
+  }
+
+  String location_Url = 'Location Not Found';
+  Future send_location(double latitude, double longitude) async {
+    emit(StartSendLocationLoadingState());
+    location_Url =
+        'https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}';
+    final Email email = Email(
+      body:
+          '${usermodel?.name} Glucose Level now is very low and his current  location is ${location_Url}',
+      subject: 'Emergency ',
+      recipients: ['${e_doc_num}'],
+      isHTML: false,
+    );
+
+    await FlutterEmailSender.send(email).then(
+      (value) {
+        emit(StaSendLocationSuccesstate());
+
+        // Timer(Duration(seconds: 3), () {
+        //   // cubit.SendNotification2();
+        //   determinePosition().then((value) {
+        //     print("Value: ${value}");
+        //     send_location(value.latitude, value.longitude);
+        //   }).catchError((e) {
+        //     print('Error: ${e}');
+        //   });
+        // });
+      },
+    ).catchError((e) {
+      emit(StaSendLocationErrorState());
+    });
   }
 }
